@@ -8,6 +8,7 @@ var buffer = require('vinyl-buffer');
 var gutil = require("gulp-util");
 var watchify = require("watchify");
 var webserver = require("gulp-webserver");
+var cleanCompiledTypeScript = require('gulp-clean-compiled-typescript');
 
 var paths = {
     sandbox: 'sandbox',
@@ -24,19 +25,24 @@ var watchedBrowserify = watchify(browserify({
         })
         .plugin(tsify))
     .transform('babelify', {
-        presets: ['env'],
-        extensions: ['.ts']
+        presets: ["es2015", "stage-3"],
+        extensions: ['.ts'],
+        plugins: ["transform-runtime"]
     });
 
 function bundle() {
     return watchedBrowserify
         .bundle()
+        .on('error', function (error) {
+            console.log('\033c');
+            console.error(error.toString());
+        })
         .pipe(source('bundle.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({
             loadMaps: true
         }))
-        .pipe(uglify())
+        // .pipe(uglify())
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.dist))
         .pipe(gulp.dest(paths.sandboxdist));
@@ -50,8 +56,13 @@ gulp.task('webserver', function() {
             port: 8080,
             livereload: true,
             directoryListing: false,
-            open: true
+            open: false
         }));
+});
+
+gulp.task('clean-compiled-ts', function () {
+  return gulp.src('./src/**/*.ts')
+    .pipe(cleanCompiledTypeScript());
 });
 
 watchedBrowserify.on("update", bundle);

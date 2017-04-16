@@ -3,7 +3,7 @@
         "sourceMap": true,
         "inlineSources": true,
         "experimentalDecorators": true,
-        "target": "es5",
+        "target": "es2015",
         "module": "amd",
         "declaration": true,
         "noImplicitAny": true,
