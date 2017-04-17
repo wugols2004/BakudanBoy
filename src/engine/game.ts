@@ -1,6 +1,7 @@
 import { Logger } from './logger'
 import { WindowManager } from './window-manager'
 import { SpriteSheet } from './spritesheet'
+import { State, TitleScreen } from './states/index'
 
 export interface IGameOptions  {
     width?: number;
@@ -20,13 +21,13 @@ export class Game {
 
     public spritesheet: SpriteSheet;
 
-    private _hasStarted: boolean = false;
-
     private _logger: Logger;
 
     private _lastTime: number = Date.now();
 
     private _timeScale: number = 1;
+
+    private _currentState: State;
 
     constructor(options?: IGameOptions) {
 
@@ -42,7 +43,7 @@ export class Game {
     }
 
     public start() {
-        this._hasStarted = true;
+        this._currentState = new TitleScreen();
 
         this.spritesheet.load().then(this._update.bind(this));
 
@@ -53,6 +54,9 @@ export class Game {
         var elapsed = Math.floor(Date.now() - this._lastTime) || 1;
         var delta = elapsed * this._timeScale;
 
+        this._currentState.Update(delta);
+
+        this._currentState.Draw(delta, this.windowManager.ctx);
 
         requestAnimationFrame(this._update.bind(this))
     }

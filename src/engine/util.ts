@@ -5,7 +5,7 @@
  */
 export function getXMLRequest(url: string): Promise<any> {
   // Return a new promise.
-  return new Promise(function(resolve, reject) {
+  return new Promise<any>(function(resolve, reject) {
     // Do the usual XHR stuff
     var req = new XMLHttpRequest();
     req.open('GET', url);
