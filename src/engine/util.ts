@@ -1,37 +1,53 @@
+import { Logger } from './logger'
+
+
 /**
  * https://developers.google.com/web/fundamentals/getting-started/primers/promises
  * @param  {string}       url [description]
  * @return {Promise<any>}     [description]
  */
 export function getXMLRequest(url: string): Promise<any> {
-  // Return a new promise.
-  return new Promise<any>(function(resolve, reject) {
-    // Do the usual XHR stuff
-    var req = new XMLHttpRequest();
-    req.open('GET', url);
+    // Return a new promise.
+    return new Promise<any>(function(resolve, reject) {
+        // Do the usual XHR stuff
+        var logger = Logger.getInstance();
+        var req = new XMLHttpRequest();
 
-    req.onload = function() {
-      // This is called even on 404 etc
-      // so check the status
-      if (req.readyState === XMLHttpRequest.DONE && req.status == 200) {
-        // Resolve the promise with the response text
-        resolve(req.response);
-      }
-      else {
-        // Otherwise reject with the status text
-        // which will hopefully be a meaningful error
-        reject(Error(req.statusText));
-      }
-    };
 
-    // Handle network errors
-    req.onerror = function() {
-      reject(Error("Network Error"));
-    };
+        req.open('GET', url);
 
-    // Make the request
-    req.send();
-  });
+        req.onload = function() {
+            // This is called even on 404 etc
+            // so check the status
+            if (req.readyState === XMLHttpRequest.DONE && req.status == 200) {
+                // Resolve the promise with the response text
+                resolve(req.response);
+            }
+            else {
+                // Otherwise reject with the status text
+                // which will hopefully be a meaningful erro
+                reject(Error(req.statusText));
+            }
+        };
+
+        // Handle network errors
+        req.onerror = function() {
+            reject(Error("Network Error"));
+        };
+
+        // Make the request
+        req.send();
+    });
+}
+
+export class Vector2 {
+    public x: number;
+    public y: number;
+
+    constructor(_x: number, _y: number) {
+        this.x = _x;
+        this.y = _y;
+    }
 }
 
 export class cRectangle {
@@ -70,4 +86,21 @@ export class cRectangle {
         return true;
 
     }
+}
+
+/**
+ * https://www.typescriptlang.org/docs/handbook/advanced-types.html
+ * @type {[type]}
+ */
+export function extend<T, U>(first: T, second: U): T & U {
+    let result = <T & U>{};
+    for (let id in first) {
+        (<any>result)[id] = (<any>first)[id];
+    }
+    for (let id in second) {
+        if (!result.hasOwnProperty(id)) {
+            (<any>result)[id] = (<any>second)[id];
+        }
+    }
+    return result;
 }

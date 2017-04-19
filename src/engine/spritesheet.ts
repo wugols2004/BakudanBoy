@@ -5,20 +5,26 @@ export class SpriteSheet {
     private static _instance: SpriteSheet = null;
 
     public frames: { [index: string]: Utils.cRectangle } = {};
-    public _image: HTMLImageElement;
+    public _image: HTMLImageElement[] = [];
 
-    private _imageUrl: string = "";
-    private _jsonUrl: string = "";
+    private _imageUrls: string[] = [];
+    private _jsonUrls: string[] = [];
 
     private _logger: Logger = Logger.getInstance();
 
-    constructor(url: string) {
+    constructor(url: string[]) {
         if (SpriteSheet._instance) {
             throw new Error('SpriteSheet is a singleton');
         }
 
-        this._imageUrl = url;
-        this._jsonUrl = url.replace(".png", "") + ".json";
+        this._imageUrls = url;
+
+        var tempurl = url;
+
+        for (let x of tempurl) {
+            x = x.replace(".png", "") + ".json";
+            this._jsonUrls.push(x);
+        }
 
         SpriteSheet._instance = this;
         return SpriteSheet._instance;
@@ -28,7 +34,7 @@ export class SpriteSheet {
     public static getInstance(): SpriteSheet {
         if (SpriteSheet._instance == null) {
 
-            SpriteSheet._instance = new SpriteSheet('');
+            SpriteSheet._instance = new SpriteSheet(['']);
         }
         return SpriteSheet._instance;
     }
@@ -36,14 +42,22 @@ export class SpriteSheet {
     public async load() {
         try {
             this._logger.debug('start loading spritesheet json..');
-            var json = await Utils.getXMLRequest(this._jsonUrl);
 
-            this._onRead(JSON.parse(json));
+            for (let jsonUrl of this._jsonUrls) {
+                this._logger.debug('loading spritesheet json: ' + jsonUrl);
+                let j = await Utils.getXMLRequest(jsonUrl);
+                this._onRead(JSON.parse(j));
+            }
 
             this._logger.debug('start loading spritesheet png..');
-            this._image = await this._loadImage(this._imageUrl);
 
-            this._logger.debug('loaded spritesheet..');
+            for (let imageUrl of this._imageUrls) {
+                this._logger.debug('loading spritesheet png: ' + imageUrl);
+                this._image.push(await this._loadImage(imageUrl));
+            }
+
+            this._logger.debug(this._image);
+            this._logger.debug('finished loading spritesheets..');
         }
         catch (err) {
             this._logger.debug('error loading spritesheet..' + err.message);

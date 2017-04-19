@@ -1267,26 +1267,192 @@ for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList'
 exports.__esModule = true;
 var spritesheet_1 = require("../spritesheet");
 var Entity = function () {
-    function Entity(paramx, paramy, img) {
+    function Entity(paramx, paramy, img, textID) {
         this.isVisible = true;
         this._SpriteSheet = spritesheet_1.SpriteSheet.getInstance();
         this.x = paramx;
         this.y = paramy;
         this.imageName = img;
+        this.textureIDX = textID;
     }
     Entity.prototype.Update = function (delta) {};
     Entity.prototype.Draw = function (delta, ctx) {
         if (!this.isVisible) return;
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.drawImage(this._SpriteSheet._image, this._SpriteSheet.frames[this.imageName].x, this._SpriteSheet.frames[this.imageName].y, this._SpriteSheet.frames[this.imageName].w, this._SpriteSheet.frames[this.imageName].h, 0, 0, this._SpriteSheet.frames[this.imageName].w, this._SpriteSheet.frames[this.imageName].h);
+        ctx.drawImage(this._SpriteSheet._image[this.textureIDX], this._SpriteSheet.frames[this.imageName].x, this._SpriteSheet.frames[this.imageName].y, this._SpriteSheet.frames[this.imageName].w, this._SpriteSheet.frames[this.imageName].h, 0, 0, this._SpriteSheet.frames[this.imageName].w, this._SpriteSheet.frames[this.imageName].h);
         ctx.restore();
     };
     return Entity;
 }();
 exports.Entity = Entity;
 
-},{"../spritesheet":78}],76:[function(require,module,exports){
+},{"../spritesheet":80}],76:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+// import  { Entity } from './entity'
+var Util = require("../util");
+var spritesheet_1 = require("../spritesheet");
+var Block;
+(function (Block) {
+    Block[Block["BLOCK"] = 0] = "BLOCK";
+    Block[Block["GROUND"] = 1] = "GROUND";
+    Block[Block["GROUND2"] = 2] = "GROUND2";
+    Block[Block["BREAKBLOCK"] = 3] = "BREAKBLOCK";
+})(Block || (Block = {}));
+var MapTile = function () {
+    function MapTile(maptileoption) {
+        this._defaultMapTileOption = {
+            width: 21,
+            height: 15,
+            blockImg: 'blocks_02.png',
+            groundImg: 'blocks_04.png',
+            ground2Img: 'blocks_05.png',
+            breakableImg: 'blocks_03.png'
+        };
+        this._mapData = [];
+        if (MapTile._instance) {
+            throw new Error('Logger is a singleton');
+        }
+        this._initialize(maptileoption);
+        MapTile._instance = this;
+        return MapTile._instance;
+    }
+    MapTile.getInstance = function () {
+        if (MapTile._instance == null) {
+            MapTile._instance = new MapTile();
+        }
+        return MapTile._instance;
+    };
+    MapTile.prototype._initialize = function (maptileoption) {
+        this._mapOption = Util.extend(this._defaultMapTileOption, maptileoption);
+        this._BlockSprites = [this._mapOption.blockImg, this._mapOption.groundImg, this._mapOption.ground2Img, this._mapOption.breakableImg];
+        this._mapData.length = 0;
+        this._SpriteSheet = spritesheet_1.SpriteSheet.getInstance();
+        this.GenerateMap(this._mapOption);
+    };
+    MapTile.prototype.GenerateMap = function (option) {
+        var count = option.width * option.height;
+        for (var x = 0; x < count; x++) {
+            if (x < this._mapOption.width) {
+                this._mapData.push(Block.BLOCK);
+            } else if (x % this._mapOption.width == 0) {
+                this._mapData.push(Block.BLOCK);
+            } else if (this._mapOption.width - x % this._mapOption.width == 1) {
+                this._mapData.push(Block.BLOCK);
+            } else if (x > this._mapOption.width * (option.height - 1)) {
+                this._mapData.push(Block.BLOCK);
+            } else {
+                var block = Block.GROUND;
+                if (!(Math.floor(x / this._mapOption.width) % 2) && !(x % this._mapOption.width % 2)) block = Block.BLOCK;
+                this._mapData.push(block);
+            }
+        }
+    };
+    MapTile.prototype.Draw = function (delta, ctx) {
+        var _this = this;
+        this._mapData.forEach(function (element, index) {
+            _this._DrawTile(delta, ctx, element, index);
+        });
+    };
+    MapTile.prototype._DrawTile = function (delta, ctx, element, index) {
+        ctx.save();
+        var frame = this._SpriteSheet.frames[this._BlockSprites[element]];
+        var x = index % this._mapOption.width * frame.w;
+        var y = index > 0 ? Math.floor(index / this._mapOption.width) * frame.h : 0;
+        ctx.translate(x, y);
+        ctx.drawImage(this._SpriteSheet._image[1], frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h);
+        ctx.restore();
+    };
+    MapTile.prototype.getTileScreenPosition = function (x, y) {
+        var vec2 = { x: 0, y: 0 };
+        var frame = this._SpriteSheet.frames[this._BlockSprites[0]];
+        var index = x + y * this._mapOption.width;
+        vec2.x = index % this._mapOption.width * frame.w;
+        vec2.y = index > 0 ? Math.floor(index / this._mapOption.width) * frame.h : 0;
+        return vec2;
+    };
+    return MapTile;
+}();
+MapTile._instance = null;
+exports.MapTile = MapTile;
+
+},{"../spritesheet":80,"../util":85}],77:[function(require,module,exports){
+"use strict";
+
+var _create = require("babel-runtime/core-js/object/create");
+
+var _create2 = _interopRequireDefault(_create);
+
+var _setPrototypeOf = require("babel-runtime/core-js/object/set-prototype-of");
+
+var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var __extends = undefined && undefined.__extends || function () {
+    var extendStatics = _setPrototypeOf2.default || { __proto__: [] } instanceof Array && function (d, b) {
+        d.__proto__ = b;
+    } || function (d, b) {
+        for (var p in b) {
+            if (b.hasOwnProperty(p)) d[p] = b[p];
+        }
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() {
+            this.constructor = d;
+        }
+        d.prototype = b === null ? (0, _create2.default)(b) : (__.prototype = b.prototype, new __());
+    };
+}();
+exports.__esModule = true;
+var entity_1 = require("./entity");
+var map_1 = require("./map");
+var Util = require("../util");
+var Player = function (_super) {
+    __extends(Player, _super);
+    function Player() {
+        var _this = _super.call(this, 0, 0, "front_1.png", 0) || this;
+        _this._offsetPosition = new Util.Vector2(1, -10);
+        _this._mapTile = map_1.MapTile.getInstance();
+        _this._playerSpeed = 1;
+        _this.Spawn();
+        return _this;
+    }
+    Player.prototype.Spawn = function () {
+        this._currentPosition = this._mapTile.getTileScreenPosition(1, 1);
+        this.UpdatePosition();
+    };
+    Player.prototype.Update = function (delta) {
+        _super.prototype.Update.call(this, delta);
+    };
+    Player.prototype.MoveUp = function () {
+        this.y -= this._playerSpeed;
+    };
+    Player.prototype.MoveDown = function () {
+        this.y += this._playerSpeed;
+    };
+    Player.prototype.MoveLeft = function () {
+        this.x -= this._playerSpeed;
+    };
+    Player.prototype.MoveRight = function () {
+        this.x += this._playerSpeed;
+    };
+    Player.prototype.DropBomb = function () {};
+    Player.prototype.UpdatePosition = function () {
+        this.x = this._currentPosition.x + this._offsetPosition.x;
+        this.y = this._currentPosition.y + this._offsetPosition.y;
+    };
+    Player.prototype.Draw = function (delta, ctx) {
+        _super.prototype.Draw.call(this, delta, ctx);
+    };
+    return Player;
+}(entity_1.Entity);
+exports.Player = Player;
+
+},{"../util":85,"./entity":75,"./map":76,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],78:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1296,18 +1462,22 @@ var spritesheet_1 = require("./spritesheet");
 var index_1 = require("./states/index");
 var Game = function () {
     function Game(options) {
+        var _this = this;
         this._lastTime = Date.now();
         this._timeScale = 1;
+        this._BUTTON_PRESSED = false;
         this._logger = logger_1.Logger.getInstance();
         this._logger.debug("starting up the engine...");
         this.windowManager = new window_manager_1.WindowManager(options);
         this.spritesheet = new spritesheet_1.SpriteSheet(options.spriteSheetUrl);
         this._timeScale = options.timeScale;
+        this.spritesheet.load().then(function () {
+            _this.start();
+        });
     }
     Game.prototype.start = function () {
-        this._currentState = new index_1.TitleScreen();
-        this.spritesheet.load().then(this._update.bind(this));
-        this._logger.debug("game has started");
+        this._currentState = new index_1.MainGame();
+        this._update();
     };
     Game.prototype._update = function () {
         var elapsed = Math.floor(Date.now() - this._lastTime) || 1;
@@ -1320,7 +1490,7 @@ var Game = function () {
 }();
 exports.Game = Game;
 
-},{"./logger":77,"./spritesheet":78,"./states/index":79,"./window-manager":83}],77:[function(require,module,exports){
+},{"./logger":79,"./spritesheet":80,"./states/index":81,"./window-manager":86}],79:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1419,7 +1589,7 @@ var Logger = function () {
 Logger._instance = null;
 exports.Logger = Logger;
 
-},{}],78:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 "use strict";
 
 var _promise = require("babel-runtime/core-js/promise");
@@ -1511,47 +1681,76 @@ var logger_1 = require("./logger");
 var SpriteSheet = function () {
     function SpriteSheet(url) {
         this.frames = {};
-        this._imageUrl = "";
-        this._jsonUrl = "";
+        this._image = [];
+        this._imageUrls = [];
+        this._jsonUrls = [];
         this._logger = logger_1.Logger.getInstance();
         if (SpriteSheet._instance) {
             throw new Error('SpriteSheet is a singleton');
         }
-        this._imageUrl = url;
-        this._jsonUrl = url.replace(".png", "") + ".json";
+        this._imageUrls = url;
+        var tempurl = url;
+        for (var _i = 0, tempurl_1 = tempurl; _i < tempurl_1.length; _i++) {
+            var x = tempurl_1[_i];
+            x = x.replace(".png", "") + ".json";
+            this._jsonUrls.push(x);
+        }
         SpriteSheet._instance = this;
         return SpriteSheet._instance;
     }
     SpriteSheet.getInstance = function () {
         if (SpriteSheet._instance == null) {
-            SpriteSheet._instance = new SpriteSheet('');
+            SpriteSheet._instance = new SpriteSheet(['']);
         }
         return SpriteSheet._instance;
     };
     SpriteSheet.prototype.load = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var json, _a, err_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _i, _a, jsonUrl, j, _b, _c, imageUrl, _d, _e, _f, err_1;
+            return __generator(this, function (_g) {
+                switch (_g.label) {
                     case 0:
-                        _b.trys.push([0, 3,, 4]);
+                        _g.trys.push([0, 9,, 10]);
                         this._logger.debug('start loading spritesheet json..');
-                        return [4 /*yield*/, Utils.getXMLRequest(this._jsonUrl)];
+                        _i = 0, _a = this._jsonUrls;
+                        _g.label = 1;
                     case 1:
-                        json = _b.sent();
-                        this._onRead(JSON.parse(json));
-                        this._logger.debug('start loading spritesheet png..');
-                        _a = this;
-                        return [4 /*yield*/, this._loadImage(this._imageUrl)];
+                        if (!(_i < _a.length)) return [3 /*break*/, 4];
+                        jsonUrl = _a[_i];
+                        this._logger.debug('loading spritesheet json: ' + jsonUrl);
+                        return [4 /*yield*/, Utils.getXMLRequest(jsonUrl)];
                     case 2:
-                        _a._image = _b.sent();
-                        this._logger.debug('loaded spritesheet..');
-                        return [3 /*break*/, 4];
+                        j = _g.sent();
+                        this._onRead(JSON.parse(j));
+                        _g.label = 3;
                     case 3:
-                        err_1 = _b.sent();
-                        this._logger.debug('error loading spritesheet..' + err_1.message);
-                        return [3 /*break*/, 4];
+                        _i++;
+                        return [3 /*break*/, 1];
                     case 4:
+                        this._logger.debug('start loading spritesheet png..');
+                        _b = 0, _c = this._imageUrls;
+                        _g.label = 5;
+                    case 5:
+                        if (!(_b < _c.length)) return [3 /*break*/, 8];
+                        imageUrl = _c[_b];
+                        this._logger.debug('loading spritesheet png: ' + imageUrl);
+                        _e = (_d = this._image).push;
+                        return [4 /*yield*/, this._loadImage(imageUrl)];
+                    case 6:
+                        _e.apply(_d, [_g.sent()]);
+                        _g.label = 7;
+                    case 7:
+                        _b++;
+                        return [3 /*break*/, 5];
+                    case 8:
+                        this._logger.debug(this._image);
+                        this._logger.debug('finished loading spritesheets..');
+                        return [3 /*break*/, 10];
+                    case 9:
+                        err_1 = _g.sent();
+                        this._logger.debug('error loading spritesheet..' + err_1.message);
+                        return [3 /*break*/, 10];
+                    case 10:
                         return [2 /*return*/];
                 }
             });
@@ -1582,7 +1781,7 @@ var SpriteSheet = function () {
 SpriteSheet._instance = null;
 exports.SpriteSheet = SpriteSheet;
 
-},{"./logger":77,"./util":82,"babel-runtime/core-js/promise":3}],79:[function(require,module,exports){
+},{"./logger":79,"./util":85,"babel-runtime/core-js/promise":3}],81:[function(require,module,exports){
 "use strict";
 
 function __export(m) {
@@ -1593,8 +1792,62 @@ function __export(m) {
 exports.__esModule = true;
 __export(require("./state"));
 __export(require("./titlescreen"));
+__export(require("./maingame"));
 
-},{"./state":80,"./titlescreen":81}],80:[function(require,module,exports){
+},{"./maingame":82,"./state":83,"./titlescreen":84}],82:[function(require,module,exports){
+"use strict";
+
+var _create = require("babel-runtime/core-js/object/create");
+
+var _create2 = _interopRequireDefault(_create);
+
+var _setPrototypeOf = require("babel-runtime/core-js/object/set-prototype-of");
+
+var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var __extends = undefined && undefined.__extends || function () {
+    var extendStatics = _setPrototypeOf2.default || { __proto__: [] } instanceof Array && function (d, b) {
+        d.__proto__ = b;
+    } || function (d, b) {
+        for (var p in b) {
+            if (b.hasOwnProperty(p)) d[p] = b[p];
+        }
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() {
+            this.constructor = d;
+        }
+        d.prototype = b === null ? (0, _create2.default)(b) : (__.prototype = b.prototype, new __());
+    };
+}();
+exports.__esModule = true;
+var state_1 = require("./state");
+var map_1 = require("../entities/map");
+var player_1 = require("../entities/player");
+var MainGame = function (_super) {
+    __extends(MainGame, _super);
+    function MainGame() {
+        var _this = _super.call(this) || this;
+        _this._MapTile = new map_1.MapTile();
+        _this._Player = new player_1.Player();
+        _this.addEntities(_this._Player);
+        return _this;
+    }
+    MainGame.prototype.Update = function (delta) {
+        _super.prototype.Update.call(this, delta);
+    };
+    MainGame.prototype.Draw = function (delta, ctx) {
+        this._MapTile.Draw(delta, ctx);
+        _super.prototype.Draw.call(this, delta, ctx);
+    };
+    return MainGame;
+}(state_1.State);
+exports.MainGame = MainGame;
+
+},{"../entities/map":76,"../entities/player":77,"./state":83,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],83:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1631,7 +1884,7 @@ var State = function () {
 }();
 exports.State = State;
 
-},{}],81:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 "use strict";
 
 var _create = require("babel-runtime/core-js/object/create");
@@ -1681,7 +1934,7 @@ var TitleScreen = function (_super) {
 }(state_1.State);
 exports.TitleScreen = TitleScreen;
 
-},{"../entities/entity":75,"./state":80,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],82:[function(require,module,exports){
+},{"../entities/entity":75,"./state":83,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],85:[function(require,module,exports){
 "use strict";
 
 var _promise = require("babel-runtime/core-js/promise");
@@ -1691,6 +1944,7 @@ var _promise2 = _interopRequireDefault(_promise);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.__esModule = true;
+var logger_1 = require("./logger");
 /**
  * https://developers.google.com/web/fundamentals/getting-started/primers/promises
  * @param  {string}       url [description]
@@ -1700,6 +1954,7 @@ function getXMLRequest(url) {
     // Return a new promise.
     return new _promise2.default(function (resolve, reject) {
         // Do the usual XHR stuff
+        var logger = logger_1.Logger.getInstance();
         var req = new XMLHttpRequest();
         req.open('GET', url);
         req.onload = function () {
@@ -1710,7 +1965,7 @@ function getXMLRequest(url) {
                 resolve(req.response);
             } else {
                 // Otherwise reject with the status text
-                // which will hopefully be a meaningful error
+                // which will hopefully be a meaningful erro
                 reject(Error(req.statusText));
             }
         };
@@ -1723,6 +1978,14 @@ function getXMLRequest(url) {
     });
 }
 exports.getXMLRequest = getXMLRequest;
+var Vector2 = function () {
+    function Vector2(_x, _y) {
+        this.x = _x;
+        this.y = _y;
+    }
+    return Vector2;
+}();
+exports.Vector2 = Vector2;
 var cRectangle = function () {
     function cRectangle(x, y, w, h) {
         if (x === void 0) {
@@ -1762,8 +2025,25 @@ var cRectangle = function () {
     return cRectangle;
 }();
 exports.cRectangle = cRectangle;
+/**
+ * https://www.typescriptlang.org/docs/handbook/advanced-types.html
+ * @type {[type]}
+ */
+function extend(first, second) {
+    var result = {};
+    for (var id in first) {
+        result[id] = first[id];
+    }
+    for (var id in second) {
+        if (!result.hasOwnProperty(id)) {
+            result[id] = second[id];
+        }
+    }
+    return result;
+}
+exports.extend = extend;
 
-},{"babel-runtime/core-js/promise":3}],83:[function(require,module,exports){
+},{"./logger":79,"babel-runtime/core-js/promise":3}],86:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1775,6 +2055,7 @@ var WindowManager = function () {
         this._initialize();
     }
     WindowManager.prototype._initialize = function () {
+        var _this = this;
         this.canvasElementId = this._options.canvasElementId;
         if (this._options.canvasElementId) {
             this._logger.debug('Using Canvas element specified: ' + this._options.canvasElementId);
@@ -1794,26 +2075,37 @@ var WindowManager = function () {
         if (!this.canvasElementId) {
             document.body.appendChild(this.canvas);
         }
+        window.addEventListener('resize', function () {
+            _this._onResize();
+        }, false);
+        this._onResize();
+    };
+    WindowManager.prototype._onResize = function () {
+        if (window.innerWidth / window.innerHeight < 1.4) return;
+        var height = window.innerHeight;
+        var ratio = this.canvas.width / this.canvas.height;
+        var width = height * ratio;
+        document.getElementById("canvas-game").style.width = width + 'px';
+        document.getElementById("canvas-game").style.height = height + 'px';
     };
     return WindowManager;
 }();
 exports.WindowManager = WindowManager;
 
-},{"./logger":77}],84:[function(require,module,exports){
+},{"./logger":79}],87:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
 var game_1 = require("./engine/game");
 console.log('Welcome to Bakudan Boy!');
 var myGame = new game_1.Game({
-    width: 800,
-    height: 600,
+    width: 336,
+    height: 240,
     canvasElementId: 'canvas-game',
-    spriteSheetUrl: './assets/image/bbo_textures.png',
+    spriteSheetUrl: ['/assets/image/bakudanboy.png', '/assets/image/blocks.png'],
     timeScale: 1
 });
-myGame.start();
 
-},{"./engine/game":76}]},{},[84])
+},{"./engine/game":78}]},{},[87])
 
 //# sourceMappingURL=bundle.js.map

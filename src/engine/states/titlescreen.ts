@@ -5,10 +5,10 @@ import { Entity } from '../entities/entity'
 export class TitleScreen extends State {
     private SprTitleScreen: Entity;
 
-    constructor(){
+    constructor() {
         super();
 
-        this.SprTitleScreen = new Entity(0,0,'titlescreen/background.png');
+        this.SprTitleScreen = new Entity(0, 0, 'titlescreen/background.png');
 
         this.addEntities(this.SprTitleScreen);
     }
@@ -18,6 +18,6 @@ export class TitleScreen extends State {
     }
 
     public Draw(delta: Number, ctx: CanvasRenderingContext2D): void {
-        super.Draw(delta,ctx);
+        super.Draw(delta, ctx);
     }
 }

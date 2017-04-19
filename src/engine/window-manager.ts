@@ -46,7 +46,25 @@ export class WindowManager {
         if (!this.canvasElementId) {
             document.body.appendChild(this.canvas);
         }
+
+        window.addEventListener('resize', () => {
+            this._onResize();
+        }, false);
+
+        this._onResize();
     }
 
+    private _onResize() {
+        if ((window.innerWidth / window.innerHeight) < 1.4)
+            return;
+
+        var height = window.innerHeight;
+
+        var ratio = this.canvas.width / this.canvas.height;
+        var width = height * ratio;
+
+        document.getElementById("canvas-game").style.width = width + 'px';
+        document.getElementById("canvas-game").style.height = height + 'px';
+    }
 
 }

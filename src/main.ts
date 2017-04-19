@@ -3,10 +3,13 @@ import { Game } from './engine/game'
 console.log('Welcome to Bakudan Boy!');
 
 var myGame = new Game({
-    width: 800,
-    height: 600,
+    width: 336,
+    height: 240,
     canvasElementId: 'canvas-game',
-    spriteSheetUrl: './assets/image/bbo_textures.png',
+    spriteSheetUrl: [
+        '/assets/image/bakudanboy.png',
+        '/assets/image/blocks.png',
+        // '/assets/image/enemy.png',
+    ],
     timeScale: 1,
 });
-myGame.start();

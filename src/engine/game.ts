@@ -1,63 +1,65 @@
 import { Logger } from './logger'
 import { WindowManager } from './window-manager'
 import { SpriteSheet } from './spritesheet'
-import { State, TitleScreen } from './states/index'
+import { State, MainGame } from './states/index'
 
-export interface IGameOptions  {
-    width?: number;
+export interface IGameOptions {
+  width?: number;
 
-    height?: number;
+  height?: number;
 
-    canvasElementId?: string;
+  canvasElementId?: string;
 
-    spriteSheetUrl: string;
+  spriteSheetUrl: string[];
 
-    timeScale: 1;
+  timeScale: 1;
 }
 
 export class Game {
 
-    public windowManager: WindowManager;
+  public windowManager: WindowManager;
 
-    public spritesheet: SpriteSheet;
+  public spritesheet: SpriteSheet;
 
-    private _logger: Logger;
+  private _logger: Logger;
 
-    private _lastTime: number = Date.now();
+  private _lastTime: number = Date.now();
 
-    private _timeScale: number = 1;
+  private _timeScale: number = 1;
 
-    private _currentState: State;
+  private _currentState: State;
 
-    constructor(options?: IGameOptions) {
+  private _BUTTON_PRESSED: boolean = false;
 
-      this._logger = Logger.getInstance();
+  constructor(options?: IGameOptions) {
 
-      this._logger.debug("starting up the engine...");
+    this._logger = Logger.getInstance();
 
-      this.windowManager = new WindowManager(options);
+    this._logger.debug("starting up the engine...");
 
-      this.spritesheet = new SpriteSheet(options.spriteSheetUrl);
+    this.windowManager = new WindowManager(options);
 
-      this._timeScale = options.timeScale;
-    }
+    this.spritesheet = new SpriteSheet(options.spriteSheetUrl);
 
-    public start() {
-        this._currentState = new TitleScreen();
+    this._timeScale = options.timeScale;
 
-        this.spritesheet.load().then(this._update.bind(this));
+    this.spritesheet.load().then(() => { this.start() });
+  }
 
-        this._logger.debug("game has started");
-    }
+  public start() {
+    this._currentState = new MainGame();
+    this._update();
+  }
 
-    _update(): void {
-        var elapsed = Math.floor(Date.now() - this._lastTime) || 1;
-        var delta = elapsed * this._timeScale;
+  _update(): void {
+    var elapsed = Math.floor(Date.now() - this._lastTime) || 1;
+    var delta = elapsed * this._timeScale;
 
-        this._currentState.Update(delta);
 
-        this._currentState.Draw(delta, this.windowManager.ctx);
+    this._currentState.Update(delta);
+    this._currentState.Draw(delta, this.windowManager.ctx);
 
-        requestAnimationFrame(this._update.bind(this))
-    }
+    requestAnimationFrame(this._update.bind(this))
+  }
+
 }
