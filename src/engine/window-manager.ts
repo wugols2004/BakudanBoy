@@ -47,6 +47,11 @@ export class WindowManager {
             document.body.appendChild(this.canvas);
         }
 
+        this.ctx.mozImageSmoothingEnabled = false;
+        this.ctx.webkitImageSmoothingEnabled = false;
+        // this.ctx.msImageSmoothingEnabled = false;
+        this.ctx.imageSmoothingEnabled = false;
+
         window.addEventListener('resize', () => {
             this._onResize();
         }, false);

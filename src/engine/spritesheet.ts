@@ -92,4 +92,22 @@ export class SpriteSheet {
             this.frames[frame_name] = temp_frame;
         }
     }
+
+    public Draw(x: number, y: number, texture: number, spritename: string, ctx: CanvasRenderingContext2D) {
+        try {
+            ctx.drawImage(
+                this._image[texture],
+                this.frames[spritename].x,
+                this.frames[spritename].y,
+                this.frames[spritename].w,
+                this.frames[spritename].h,
+                x,
+                y,
+                this.frames[spritename].w,
+                this.frames[spritename].h);
+        } catch (err) {
+            Logger.getInstance().error("error drawing " + spritename);
+        }
+
+    }
 }

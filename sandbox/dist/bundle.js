@@ -1264,11 +1264,397 @@ for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList'
 },{"./_global":23,"./_hide":25,"./_iterators":37,"./_wks":66,"./es6.array.iterator":68}],75:[function(require,module,exports){
 "use strict";
 
+var _promise = require("babel-runtime/core-js/promise");
+
+var _promise2 = _interopRequireDefault(_promise);
+
+var _create = require("babel-runtime/core-js/object/create");
+
+var _create2 = _interopRequireDefault(_create);
+
+var _setPrototypeOf = require("babel-runtime/core-js/object/set-prototype-of");
+
+var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var __extends = undefined && undefined.__extends || function () {
+    var extendStatics = _setPrototypeOf2.default || { __proto__: [] } instanceof Array && function (d, b) {
+        d.__proto__ = b;
+    } || function (d, b) {
+        for (var p in b) {
+            if (b.hasOwnProperty(p)) d[p] = b[p];
+        }
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() {
+            this.constructor = d;
+        }
+        d.prototype = b === null ? (0, _create2.default)(b) : (__.prototype = b.prototype, new __());
+    };
+}();
+var __awaiter = undefined && undefined.__awaiter || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = _promise2.default))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function rejected(value) {
+            try {
+                step(generator["throw"](value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function step(result) {
+            result.done ? resolve(result.value) : new P(function (resolve) {
+                resolve(result.value);
+            }).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = undefined && undefined.__generator || function (thisArg, body) {
+    var _ = { label: 0, sent: function sent() {
+            if (t[0] & 1) throw t[1];return t[1];
+        }, trys: [], ops: [] },
+        f,
+        y,
+        t;
+    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    function verb(n) {
+        return function (v) {
+            return step([n, v]);
+        };
+    }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) {
+            try {
+                if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+                if (y = 0, t) op = [0, t.value];
+                switch (op[0]) {
+                    case 0:case 1:
+                        t = op;break;
+                    case 4:
+                        _.label++;return { value: op[1], done: false };
+                    case 5:
+                        _.label++;y = op[1];op = [0];continue;
+                    case 7:
+                        op = _.ops.pop();_.trys.pop();continue;
+                    default:
+                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                            _ = 0;continue;
+                        }
+                        if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                            _.label = op[1];break;
+                        }
+                        if (op[0] === 6 && _.label < t[1]) {
+                            _.label = t[1];t = op;break;
+                        }
+                        if (t && _.label < t[2]) {
+                            _.label = t[2];_.ops.push(op);break;
+                        }
+                        if (t[2]) _.ops.pop();
+                        _.trys.pop();continue;
+                }
+                op = body.call(thisArg, _);
+            } catch (e) {
+                op = [6, e];y = 0;
+            } finally {
+                f = t = 0;
+            }
+        }if (op[0] & 5) throw op[1];return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+exports.__esModule = true;
+var entity_1 = require("./entity");
+var map_1 = require("./map");
+var logger_1 = require("../logger");
+var Util = require("../util");
+var spritesheet_1 = require("../spritesheet");
+var _BOMB_TIME_OUT = 3000;
+var BOMB_STATES;
+(function (BOMB_STATES) {
+    BOMB_STATES[BOMB_STATES["IDLE"] = 0] = "IDLE";
+    BOMB_STATES[BOMB_STATES["EXPLODING"] = 1] = "EXPLODING";
+    BOMB_STATES[BOMB_STATES["CLEAN_UP"] = 2] = "CLEAN_UP";
+})(BOMB_STATES || (BOMB_STATES = {}));
+var DIRECTION;
+(function (DIRECTION) {
+    DIRECTION[DIRECTION["UP"] = 0] = "UP";
+    DIRECTION[DIRECTION["DOWN"] = 1] = "DOWN";
+    DIRECTION[DIRECTION["LEFT"] = 2] = "LEFT";
+    DIRECTION[DIRECTION["RIGHT"] = 3] = "RIGHT";
+})(DIRECTION || (DIRECTION = {}));
+var BombExplosion = function () {
+    function BombExplosion(_tileX, _tileY, _bombLength) {
+        this._fireCrossAnim = ['fire_cross_1.png', 'fire_cross_2.png', 'fire_cross_3.png', 'fire_cross_4.png', 'fire_cross_5.png'];
+        this._fireDownAnim = ['fire_down_1.png', 'fire_down_2.png', 'fire_down_3.png', 'fire_down_4.png', 'fire_down_5.png'];
+        this._fireUpAnim = ['fire_up_1.png', 'fire_up_2.png', 'fire_up_3.png', 'fire_up_4.png', 'fire_up_5.png'];
+        this._fireLeftAnim = ['fire_left_1.png', 'fire_left_2.png', 'fire_left_3.png', 'fire_left_4.png', 'fire_left_5.png'];
+        this._fireRightAnim = ['fire_right_1.png', 'fire_right_2.png', 'fire_right_3.png', 'fire_right_4.png', 'fire_right_5.png'];
+        this._fireExtVerticalAnim = ['fire_ext_ud_1.png', 'fire_ext_ud_2.png', 'fire_ext_ud_3.png', 'fire_ext_ud_4.png', 'fire_ext_ud_5.png'];
+        this._fireExtHorizontalAnim = ['fire_ext_lr_1.png', 'fire_ext_lr_2.png', 'fire_ext_lr_3.png', 'fire_ext_lr_4.png', 'fire_ext_lr_5.png'];
+        this._bombLength = 1;
+        this._currentTick = 0;
+        this._animSpeed = 90;
+        this._currentAnimIdx = 0;
+        this.tileX = -1;
+        this.tileY = -1;
+        this.screenX = -1;
+        this.screenY = -1;
+        this._isDone = false;
+        this._isReverse = false;
+        this._SpriteSheet = spritesheet_1.SpriteSheet.getInstance();
+        this._BombExplosionLengthArr = [1, 1, 1, 1 //down
+        ];
+        this.tileX = _tileX;
+        this.tileY = _tileY;
+        var vec2 = map_1.MapTile.getInstance().getTileScreenPosition(_tileX, _tileY);
+        this.screenX = vec2.x;
+        this.screenY = vec2.y;
+        this._bombLength = _bombLength;
+        this._BombExplosionLengthArr = this._CheckBounds();
+    }
+    BombExplosion.prototype.update = function () {
+        if (!this._isDone) {
+            var time = Date.now();
+            if (time - this._currentTick > this._animSpeed) {
+                this._currentTick = time;
+                if (this._isReverse) {
+                    this._currentAnimIdx--;
+                    if (this._currentAnimIdx < 0) {
+                        this.onAnimEnd();
+                        this._isDone = true;
+                    }
+                } else {
+                    this._currentAnimIdx++;
+                    if (this._currentAnimIdx >= this._fireCrossAnim.length) {
+                        this._currentAnimIdx = this._fireCrossAnim.length - 1;
+                        this._isReverse = true;
+                    }
+                }
+            }
+        }
+    };
+    BombExplosion.prototype.Draw = function (ctx) {
+        if (this._isDone) return;
+        ctx.save();
+        ctx.translate(this.screenX, this.screenY);
+        //draw center
+        this._SpriteSheet.Draw(0, 0, 1, this._fireCrossAnim[this._currentAnimIdx], ctx);
+        //vertical
+        for (var i = 1; i <= this._BombExplosionLengthArr[DIRECTION.UP]; i++) {
+            if (i === this._bombLength) this._SpriteSheet.Draw(0, -16 * i, 1, this._fireUpAnim[this._currentAnimIdx], ctx);else this._SpriteSheet.Draw(0, -16 * i, 1, this._fireExtVerticalAnim[this._currentAnimIdx], ctx);
+        }
+        for (var i = 1; i <= this._BombExplosionLengthArr[DIRECTION.DOWN]; i++) {
+            if (i === this._bombLength) this._SpriteSheet.Draw(0, 16 * i, 1, this._fireDownAnim[this._currentAnimIdx], ctx);else this._SpriteSheet.Draw(0, 16 * i, 1, this._fireExtVerticalAnim[this._currentAnimIdx], ctx);
+        }
+        //horizontal
+        for (var i = 1; i <= this._BombExplosionLengthArr[DIRECTION.RIGHT]; i++) {
+            if (i === this._bombLength) this._SpriteSheet.Draw(16 * i, 0, 1, this._fireRightAnim[this._currentAnimIdx], ctx);else this._SpriteSheet.Draw(16 * i, 0, 1, this._fireExtHorizontalAnim[this._currentAnimIdx], ctx);
+        }
+        for (var i = 1; i <= this._BombExplosionLengthArr[DIRECTION.LEFT]; i++) {
+            if (i === this._bombLength) this._SpriteSheet.Draw(-16 * i, 0, 1, this._fireLeftAnim[this._currentAnimIdx], ctx);else this._SpriteSheet.Draw(-16 * i, 0, 1, this._fireExtHorizontalAnim[this._currentAnimIdx], ctx);
+        }
+        ctx.restore();
+    };
+    BombExplosion.prototype.isEnd = function () {
+        return this._isDone;
+    };
+    BombExplosion.prototype._CheckBounds = function () {
+        var boundarray = [0, 0, 0, 0];
+        for (var i = 0; i < this._bombLength; i++) {
+            var block = map_1.MapTile.getInstance().getTile(this.tileX, this.tileY - 1 - i);
+            if (block != map_1.Block.GROUND) {
+                if (block == map_1.Block.BREAKBLOCK) {
+                    map_1.MapTile.getInstance().DestroyTile(this.tileX, this.tileY - 1 - i);
+                }
+                break;
+            }
+            boundarray[DIRECTION.UP]++;
+        }
+        for (var i = 0; i < this._bombLength; i++) {
+            var block = map_1.MapTile.getInstance().getTile(this.tileX, this.tileY + 1 + i);
+            if (block != map_1.Block.GROUND) {
+                if (block == map_1.Block.BREAKBLOCK) {
+                    map_1.MapTile.getInstance().DestroyTile(this.tileX, this.tileY + 1 + i);
+                }
+                break;
+            }
+            boundarray[DIRECTION.DOWN]++;
+        }
+        for (var i = 0; i < this._bombLength; i++) {
+            var block = map_1.MapTile.getInstance().getTile(this.tileX - 1 - i, this.tileY);
+            if (block != map_1.Block.GROUND) {
+                if (block == map_1.Block.BREAKBLOCK) {
+                    map_1.MapTile.getInstance().DestroyTile(this.tileX - 1 - i, this.tileY);
+                }
+                break;
+            }
+            boundarray[DIRECTION.LEFT]++;
+        }
+        for (var i = 0; i < this._bombLength; i++) {
+            var block = map_1.MapTile.getInstance().getTile(this.tileX + 1 + i, this.tileY);
+            if (block != map_1.Block.GROUND) {
+                if (block == map_1.Block.BREAKBLOCK) {
+                    map_1.MapTile.getInstance().DestroyTile(this.tileX + 1 + i, this.tileY);
+                }
+                break;
+            }
+            boundarray[DIRECTION.RIGHT]++;
+        }
+        logger_1.Logger.getInstance().debug(boundarray);
+        return boundarray;
+    };
+    return BombExplosion;
+}();
+var Bomb = function (_super) {
+    __extends(Bomb, _super);
+    function Bomb(_tileX, _tileY) {
+        var _this = _super.call(this, 0, 0, 'bomb_1.png', 1) || this;
+        _this._bombSprites = ['bomb_1.png', 'bomb_2.png', 'bomb_3.png', 'bomb_2.png'];
+        _this.toDelete = false;
+        _this._bombLength = 2;
+        _this._currentTick = 0;
+        _this._animSpeed = 320;
+        _this._currentBombIdleIdx = 0;
+        _this._kaboom = false;
+        _this._bombAnimObj = null;
+        _this.currentMapPosition = new Util.Vector2(_tileX, _tileY);
+        var vec2 = map_1.MapTile.getInstance().getTileScreenPosition(_tileX, _tileY);
+        _this.x = vec2.x;
+        _this.y = vec2.y;
+        _this.toDelete = false;
+        _this._BombTimerStart();
+        return _this;
+    }
+    Bomb.prototype.Update = function (delta) {
+        _super.prototype.Update.call(this, delta);
+        this._tick();
+        if (this._bombAnimObj !== null) this._bombAnimObj.update();
+    };
+    Bomb.prototype.Draw = function (delta, ctx) {
+        _super.prototype.Draw.call(this, delta, ctx);
+        if (this._bombAnimObj !== null) this._bombAnimObj.Draw(ctx);
+    };
+    Bomb.prototype._tick = function () {
+        if (this._kaboom) return false;
+        var time = Date.now();
+        if (time - this._currentTick > this._animSpeed) {
+            this.imageName = this._bombSprites[this._currentBombIdleIdx];
+            this._currentBombIdleIdx = (this._currentBombIdleIdx + 1) % this._bombSprites.length;
+            this._currentTick = time;
+            return true;
+        }
+        return false;
+    };
+    Bomb.prototype._BombTimerStart = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        logger_1.Logger.getInstance().debug("BOMB TIMER STARTED");
+                        return [4 /*yield*/, Util.sleep(_BOMB_TIME_OUT)];
+                    case 1:
+                        _a.sent();
+                        logger_1.Logger.getInstance().debug("KABOOM");
+                        return [4 /*yield*/, this._processExplosion()];
+                    case 2:
+                        _a.sent();
+                        logger_1.Logger.getInstance().debug("BOMB DELETE");
+                        this.toDelete = true;
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Bomb.prototype._processExplosion = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new _promise2.default(function (r, e) {
+                    try {
+                        _this._kaboom = true;
+                        _this.imageName = "";
+                        _this._currentTick = 0;
+                        _this._bombAnimObj = new BombExplosion(_this.currentMapPosition.x, _this.currentMapPosition.y, _this._bombLength);
+                        _this._bombAnimObj.onAnimEnd = function () {
+                            r(true);
+                        };
+                    } catch (err) {
+                        logger_1.Logger.getInstance().error(err.message);
+                        e(false);
+                    }
+                })];
+            });
+        });
+    };
+    return Bomb;
+}(entity_1.Entity);
+var BombManager = function (_super) {
+    __extends(BombManager, _super);
+    function BombManager() {
+        var _this = _super.call(this, 0, 0, "", 0) || this;
+        _this._bombs = [];
+        _this._MapTile = map_1.MapTile.getInstance();
+        _this._MaxBomb = 1;
+        return _this;
+    }
+    BombManager.getInstance = function () {
+        if (BombManager._instance == null) {
+            BombManager._instance = new BombManager();
+        }
+        return BombManager._instance;
+    };
+    BombManager.prototype.SpawnBomb = function (posX, posY) {
+        if (this._bombs.length >= this._MaxBomb) return;
+        var vec2 = this._MapTile.getScreenToTilePosition(posX, posY);
+        var found = false;
+        //check if current tile is valid
+        for (var _i = 0, _a = this._bombs; _i < _a.length; _i++) {
+            var bomb = _a[_i];
+            if (bomb.currentMapPosition.x == vec2.x && bomb.currentMapPosition.y == vec2.y) found = true;
+        }
+        if (!found) {
+            this._bombs.push(new Bomb(vec2.x, vec2.y));
+        }
+    };
+    BombManager.prototype.Update = function (delta) {
+        _super.prototype.Update.call(this, delta);
+        this._bombs.forEach(function (bomb, idx, bombs) {
+            bomb.Update(delta);
+            if (bomb.toDelete) {
+                bombs.splice(bombs.indexOf(bomb), 1);
+            }
+        });
+    };
+    BombManager.prototype.Draw = function (delta, ctx) {
+        _super.prototype.Draw.call(this, delta, ctx);
+        this._bombs.forEach(function (bomb) {
+            bomb.Draw(delta, ctx);
+        });
+    };
+    return BombManager;
+}(entity_1.Entity);
+BombManager._instance = null;
+exports.BombManager = BombManager;
+
+},{"../logger":81,"../spritesheet":82,"../util":87,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2,"babel-runtime/core-js/promise":3}],76:[function(require,module,exports){
+"use strict";
+
 exports.__esModule = true;
 var spritesheet_1 = require("../spritesheet");
+var logger_1 = require("../logger");
 var Entity = function () {
     function Entity(paramx, paramy, img, textID) {
         this.isVisible = true;
+        this.imageName = "";
         this._SpriteSheet = spritesheet_1.SpriteSheet.getInstance();
         this.x = paramx;
         this.y = paramy;
@@ -1277,41 +1663,93 @@ var Entity = function () {
     }
     Entity.prototype.Update = function (delta) {};
     Entity.prototype.Draw = function (delta, ctx) {
-        if (!this.isVisible) return;
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.drawImage(this._SpriteSheet._image[this.textureIDX], this._SpriteSheet.frames[this.imageName].x, this._SpriteSheet.frames[this.imageName].y, this._SpriteSheet.frames[this.imageName].w, this._SpriteSheet.frames[this.imageName].h, 0, 0, this._SpriteSheet.frames[this.imageName].w, this._SpriteSheet.frames[this.imageName].h);
-        ctx.restore();
+        if (!this.isVisible || this.imageName === "") return;
+        try {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            this._SpriteSheet.Draw(0, 0, this.textureIDX, this.imageName, ctx);
+            ctx.restore();
+        } catch (e) {
+            logger_1.Logger.getInstance().error("Error drawing [" + this.imageName + "] :" + e.message, this.imageName);
+        }
     };
     return Entity;
 }();
 exports.Entity = Entity;
 
-},{"../spritesheet":80}],76:[function(require,module,exports){
+},{"../logger":81,"../spritesheet":82}],77:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
 // import  { Entity } from './entity'
 var Util = require("../util");
 var spritesheet_1 = require("../spritesheet");
+var logger_1 = require("../logger");
 var Block;
 (function (Block) {
     Block[Block["BLOCK"] = 0] = "BLOCK";
     Block[Block["GROUND"] = 1] = "GROUND";
     Block[Block["GROUND2"] = 2] = "GROUND2";
     Block[Block["BREAKBLOCK"] = 3] = "BREAKBLOCK";
-})(Block || (Block = {}));
+    Block[Block["BOMB"] = 4] = "BOMB";
+})(Block = exports.Block || (exports.Block = {}));
+var BreakBlockAnim = function () {
+    function BreakBlockAnim(_tileX, _tileY, _onAnimEnd) {
+        this._BreakBlockAnim = ['block_break_1.png', 'block_break_2.png', 'block_break_3.png', 'block_break_4.png', 'block_break_5.png'];
+        this._currentTick = 0;
+        this._animSpeed = 150;
+        this._currentAnimIdx = 0;
+        this._SpriteSheet = spritesheet_1.SpriteSheet.getInstance();
+        this.tileX = -1;
+        this.tileY = -1;
+        this.screenX = -1;
+        this.screenY = -1;
+        this._isDone = false;
+        this.tileX = _tileX;
+        this.tileY = _tileY;
+        var vec2 = MapTile.getInstance().getTileScreenPosition(_tileX, _tileY);
+        this.screenX = vec2.x;
+        this.screenY = vec2.y;
+        this.onAnimEnd = _onAnimEnd;
+    }
+    BreakBlockAnim.prototype.update = function () {
+        if (this._isDone) return;
+        var time = Date.now();
+        if (time - this._currentTick > this._animSpeed) {
+            this._currentTick = time;
+            this._currentAnimIdx++;
+            if (this._currentAnimIdx >= this._BreakBlockAnim.length) {
+                this.onAnimEnd(this);
+                this._isDone = true;
+            }
+        }
+    };
+    BreakBlockAnim.prototype.Draw = function (ctx) {
+        this.update();
+        if (this._isDone || this._currentAnimIdx >= this._BreakBlockAnim.length) return;
+        ctx.save();
+        ctx.translate(this.screenX, this.screenY);
+        this._SpriteSheet.Draw(0, 0, 1, this._BreakBlockAnim[this._currentAnimIdx], ctx);
+        ctx.restore();
+    };
+    return BreakBlockAnim;
+}();
 var MapTile = function () {
     function MapTile(maptileoption) {
         this._defaultMapTileOption = {
             width: 21,
             height: 15,
+            tileWidth: 16,
+            tileHeight: 16,
+            breakBlockChance: 40,
             blockImg: 'blocks_02.png',
             groundImg: 'blocks_04.png',
             ground2Img: 'blocks_05.png',
             breakableImg: 'blocks_03.png'
         };
         this._mapData = [];
+        this._logger = logger_1.Logger.getInstance();
+        this._blockAnim = [];
         if (MapTile._instance) {
             throw new Error('Logger is a singleton');
         }
@@ -1344,41 +1782,98 @@ var MapTile = function () {
             } else if (x > this._mapOption.width * (option.height - 1)) {
                 this._mapData.push(Block.BLOCK);
             } else {
-                var block = Block.GROUND;
-                if (!(Math.floor(x / this._mapOption.width) % 2) && !(x % this._mapOption.width % 2)) block = Block.BLOCK;
+                var block = Block.BREAKBLOCK;
+                var col = x % this._mapOption.width;
+                var row = Math.floor(x / option.width);
+                if (!(Math.floor(x / this._mapOption.width) % 2) && !(x % this._mapOption.width % 2)) {
+                    block = Block.BLOCK;
+                } else if (col < 4 && row == 1 || col < 4 && row == this._mapOption.height - 2 || col < this._mapOption.width && col > this._mapOption.width - 5 && row == 1 || col < this._mapOption.width && col > this._mapOption.width - 5 && row == this._mapOption.height - 2 || col == 1 && row < 3 || col == this._mapOption.width - 2 && row < 3 || col == 1 && row > this._mapOption.height - 4 && row < this._mapOption.height || col == this._mapOption.width - 2 && row > this._mapOption.height - 4 && row < this._mapOption.height) {
+                    block = Block.GROUND;
+                } else {
+                    var rand = Math.random() * 100 + 1 > this._mapOption.breakBlockChance;
+                    block = rand ? Block.GROUND : Block.BREAKBLOCK;
+                }
                 this._mapData.push(block);
             }
         }
     };
     MapTile.prototype.Draw = function (delta, ctx) {
         var _this = this;
-        this._mapData.forEach(function (element, index) {
-            _this._DrawTile(delta, ctx, element, index);
+        this._mapData.forEach(function (tile_value, index) {
+            _this._DrawTile(delta, ctx, tile_value, index);
+        });
+        this._blockAnim.forEach(function (block) {
+            block.Draw(ctx);
         });
     };
-    MapTile.prototype._DrawTile = function (delta, ctx, element, index) {
+    MapTile.prototype._DrawTile = function (delta, ctx, tile_value, index) {
         ctx.save();
-        var frame = this._SpriteSheet.frames[this._BlockSprites[element]];
+        var frame = this._SpriteSheet.frames[this._BlockSprites[tile_value]];
         var x = index % this._mapOption.width * frame.w;
         var y = index > 0 ? Math.floor(index / this._mapOption.width) * frame.h : 0;
         ctx.translate(x, y);
         ctx.drawImage(this._SpriteSheet._image[1], frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h);
         ctx.restore();
     };
+    MapTile.prototype.getTile = function (x, y) {
+        return this._mapData[x + y * this._mapOption.width];
+    };
     MapTile.prototype.getTileScreenPosition = function (x, y) {
         var vec2 = { x: 0, y: 0 };
-        var frame = this._SpriteSheet.frames[this._BlockSprites[0]];
         var index = x + y * this._mapOption.width;
+        var frame = this._SpriteSheet.frames[this._BlockSprites[0]];
         vec2.x = index % this._mapOption.width * frame.w;
         vec2.y = index > 0 ? Math.floor(index / this._mapOption.width) * frame.h : 0;
         return vec2;
+    };
+    MapTile.prototype.getScreenToTilePosition = function (x, y) {
+        var vec2 = { x: 0, y: 0 };
+        var frame = this._SpriteSheet.frames[this._BlockSprites[0]];
+        vec2.x = Math.floor(x / frame.w);
+        vec2.y = Math.floor(y / frame.h);
+        return vec2;
+    };
+    MapTile.prototype.checkMoveForCollisionX = function (posX, posY, boundX, boundY, intent) {
+        var newposition = posX;
+        var collide = true;
+        var checkLeftPos = Math.floor((posX + intent) / this._mapOption.tileWidth);
+        var checkRightPos = Math.floor((posX + intent + boundX) / this._mapOption.tileWidth);
+        // let checkPos = Math.floor((posX + intent + boundX) / this._mapOption.tileWidth);
+        var tileY = Math.floor(posY / this._mapOption.tileHeight);
+        var tileBottomY = Math.floor((posY + boundY) / this._mapOption.tileHeight);
+        if (this._mapData[checkLeftPos + tileY * this._mapOption.width] === Block.GROUND && this._mapData[checkRightPos + tileY * this._mapOption.width] === Block.GROUND && this._mapData[checkLeftPos + tileBottomY * this._mapOption.width] === Block.GROUND && this._mapData[checkRightPos + tileBottomY * this._mapOption.width] === Block.GROUND) {
+            newposition += intent;
+            collide = false;
+        }
+        return newposition;
+    };
+    MapTile.prototype.checkMoveForCollisionY = function (posX, posY, boundX, boundY, intent) {
+        var newposition = posY;
+        var collide = true;
+        var checkTopPos = Math.floor((posY + intent) / this._mapOption.tileWidth);
+        var checkBottomPos = Math.floor((posY + intent + boundY) / this._mapOption.tileWidth);
+        var tileX = Math.floor(posX / this._mapOption.tileWidth);
+        var tileRightX = Math.floor((posX + boundX) / this._mapOption.tileWidth);
+        if (this._mapData[tileX + checkTopPos * this._mapOption.width] === Block.GROUND && this._mapData[tileX + checkBottomPos * this._mapOption.width] === Block.GROUND && this._mapData[tileRightX + checkTopPos * this._mapOption.width] === Block.GROUND && this._mapData[tileRightX + checkBottomPos * this._mapOption.width] === Block.GROUND) {
+            newposition += intent;
+            collide = false;
+        }
+        return newposition;
+    };
+    MapTile.prototype.DestroyTile = function (tilex, tiley) {
+        var _this = this;
+        this._blockAnim.push(new BreakBlockAnim(tilex, tiley, function (bomb) {
+            var idx = _this._blockAnim.indexOf(bomb);
+            _this._blockAnim.splice(idx, 1);
+        }));
+        this._mapData[tilex + tiley * this._mapOption.width] = Block.GROUND;
     };
     return MapTile;
 }();
 MapTile._instance = null;
 exports.MapTile = MapTile;
 
-},{"../spritesheet":80,"../util":85}],77:[function(require,module,exports){
+},{"../logger":81,"../spritesheet":82,"../util":87}],78:[function(require,module,exports){
 "use strict";
 
 var _create = require("babel-runtime/core-js/object/create");
@@ -1410,6 +1905,8 @@ var __extends = undefined && undefined.__extends || function () {
 exports.__esModule = true;
 var entity_1 = require("./entity");
 var map_1 = require("./map");
+var logger_1 = require("../logger");
+var bomb_manager_1 = require("./bomb-manager");
 var Util = require("../util");
 var Player = function (_super) {
     __extends(Player, _super);
@@ -1418,6 +1915,10 @@ var Player = function (_super) {
         _this._offsetPosition = new Util.Vector2(1, -10);
         _this._mapTile = map_1.MapTile.getInstance();
         _this._playerSpeed = 1;
+        _this._logger = logger_1.Logger.getInstance();
+        _this._bombManager = bomb_manager_1.BombManager.getInstance();
+        _this._playerWidth = 15;
+        _this._playerHeight = 14;
         _this.Spawn();
         return _this;
     }
@@ -1427,20 +1928,24 @@ var Player = function (_super) {
     };
     Player.prototype.Update = function (delta) {
         _super.prototype.Update.call(this, delta);
+        this.UpdatePosition();
     };
     Player.prototype.MoveUp = function () {
-        this.y -= this._playerSpeed;
+        this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
     };
     Player.prototype.MoveDown = function () {
-        this.y += this._playerSpeed;
+        this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
     };
     Player.prototype.MoveLeft = function () {
-        this.x -= this._playerSpeed;
+        this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
     };
     Player.prototype.MoveRight = function () {
-        this.x += this._playerSpeed;
+        this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
     };
-    Player.prototype.DropBomb = function () {};
+    Player.prototype.DropBomb = function () {
+        this._bombManager.SpawnBomb(this._currentPosition.x, this._currentPosition.y);
+    };
+    Player.prototype.Stop = function () {};
     Player.prototype.UpdatePosition = function () {
         this.x = this._currentPosition.x + this._offsetPosition.x;
         this.y = this._currentPosition.y + this._offsetPosition.y;
@@ -1452,7 +1957,7 @@ var Player = function (_super) {
 }(entity_1.Entity);
 exports.Player = Player;
 
-},{"../util":85,"./entity":75,"./map":76,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],78:[function(require,module,exports){
+},{"../logger":81,"../util":87,"./bomb-manager":75,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],79:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1465,7 +1970,6 @@ var Game = function () {
         var _this = this;
         this._lastTime = Date.now();
         this._timeScale = 1;
-        this._BUTTON_PRESSED = false;
         this._logger = logger_1.Logger.getInstance();
         this._logger.debug("starting up the engine...");
         this.windowManager = new window_manager_1.WindowManager(options);
@@ -1477,6 +1981,7 @@ var Game = function () {
     }
     Game.prototype.start = function () {
         this._currentState = new index_1.MainGame();
+        this._currentTick = 0;
         this._update();
     };
     Game.prototype._update = function () {
@@ -1490,7 +1995,49 @@ var Game = function () {
 }();
 exports.Game = Game;
 
-},{"./logger":79,"./spritesheet":80,"./states/index":81,"./window-manager":86}],79:[function(require,module,exports){
+},{"./logger":81,"./spritesheet":82,"./states/index":83,"./window-manager":88}],80:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+var InputController = function () {
+    function InputController(options) {
+        var _this = this;
+        this._InputOptions = options;
+        this._keyPressed = [];
+        this._keyPressed[87 /* UP */] = false;
+        this._keyPressed[83 /* DOWN */] = false;
+        this._keyPressed[65 /* LEFT */] = false;
+        this._keyPressed[68 /* RIGHT */] = false;
+        this._keyPressed[32 /* BOMB */] = false;
+        this._keyPressed[27 /* ESC */] = false;
+        window.addEventListener('keydown', function (e) {
+            _this._KeyDownCallback(e);
+        });
+        window.addEventListener('keyup', function (e) {
+            _this._KeyUpCallback(e);
+        });
+    }
+    InputController.prototype.Update = function () {
+        if (this._keyPressed[87 /* UP */]) this._InputOptions.Up_KeyDown();
+        if (this._keyPressed[83 /* DOWN */]) this._InputOptions.Down_KeyDown();
+        if (this._keyPressed[65 /* LEFT */]) this._InputOptions.Left_KeyDown();
+        if (this._keyPressed[68 /* RIGHT */]) this._InputOptions.Right_KeyDown();
+        if (this._keyPressed[32 /* BOMB */]) this._InputOptions.BOMB_KeyDown();
+        if (this._keyPressed[27 /* ESC */]) this._InputOptions.ESC_KeyDown();
+    };
+    InputController.prototype._KeyDownCallback = function (e) {
+        var kcode = e.which || e.keyCode;
+        this._keyPressed[kcode] = true;
+    };
+    InputController.prototype._KeyUpCallback = function (e) {
+        var kcode = e.which || e.keyCode;
+        this._keyPressed[kcode] = false;
+    };
+    return InputController;
+}();
+exports.InputController = InputController;
+
+},{}],81:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1589,7 +2136,7 @@ var Logger = function () {
 Logger._instance = null;
 exports.Logger = Logger;
 
-},{}],80:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 "use strict";
 
 var _promise = require("babel-runtime/core-js/promise");
@@ -1776,12 +2323,19 @@ var SpriteSheet = function () {
             this.frames[frame_name] = temp_frame;
         }
     };
+    SpriteSheet.prototype.Draw = function (x, y, texture, spritename, ctx) {
+        try {
+            ctx.drawImage(this._image[texture], this.frames[spritename].x, this.frames[spritename].y, this.frames[spritename].w, this.frames[spritename].h, x, y, this.frames[spritename].w, this.frames[spritename].h);
+        } catch (err) {
+            logger_1.Logger.getInstance().error("error drawing " + spritename);
+        }
+    };
     return SpriteSheet;
 }();
 SpriteSheet._instance = null;
 exports.SpriteSheet = SpriteSheet;
 
-},{"./logger":79,"./util":85,"babel-runtime/core-js/promise":3}],81:[function(require,module,exports){
+},{"./logger":81,"./util":87,"babel-runtime/core-js/promise":3}],83:[function(require,module,exports){
 "use strict";
 
 function __export(m) {
@@ -1794,7 +2348,7 @@ __export(require("./state"));
 __export(require("./titlescreen"));
 __export(require("./maingame"));
 
-},{"./maingame":82,"./state":83,"./titlescreen":84}],82:[function(require,module,exports){
+},{"./maingame":84,"./state":85,"./titlescreen":86}],84:[function(require,module,exports){
 "use strict";
 
 var _create = require("babel-runtime/core-js/object/create");
@@ -1827,17 +2381,56 @@ exports.__esModule = true;
 var state_1 = require("./state");
 var map_1 = require("../entities/map");
 var player_1 = require("../entities/player");
+var input_1 = require("../input");
+var bomb_manager_1 = require("../entities/bomb-manager");
 var MainGame = function (_super) {
     __extends(MainGame, _super);
     function MainGame() {
         var _this = _super.call(this) || this;
-        _this._MapTile = new map_1.MapTile();
+        _this._BombManager = bomb_manager_1.BombManager.getInstance();
+        _this._MapTile = map_1.MapTile.getInstance();
+        _this.addEntities(_this._BombManager);
         _this._Player = new player_1.Player();
         _this.addEntities(_this._Player);
+        _this._InputController = new input_1.InputController({
+            Up_KeyDown: function Up_KeyDown() {
+                _this._Player.MoveUp();
+            },
+            Down_KeyDown: function Down_KeyDown() {
+                _this._Player.MoveDown();
+            },
+            Left_KeyDown: function Left_KeyDown() {
+                _this._Player.MoveLeft();
+            },
+            Right_KeyDown: function Right_KeyDown() {
+                _this._Player.MoveRight();
+            },
+            BOMB_KeyDown: function BOMB_KeyDown() {
+                _this._Player.DropBomb();
+            },
+            ESC_KeyDown: function ESC_KeyDown() {},
+            Up_KeyUp: function Up_KeyUp() {
+                _this._Player.MoveUp();
+            },
+            Down_KeyUp: function Down_KeyUp() {
+                _this._Player.MoveDown();
+            },
+            Left_KeyUp: function Left_KeyUp() {
+                _this._Player.MoveLeft();
+            },
+            Right_KeyUp: function Right_KeyUp() {
+                _this._Player.MoveRight();
+            },
+            BOMB_KeyUp: function BOMB_KeyUp() {
+                _this._Player.DropBomb();
+            },
+            ESC_KeyUp: function ESC_KeyUp() {}
+        });
         return _this;
     }
     MainGame.prototype.Update = function (delta) {
         _super.prototype.Update.call(this, delta);
+        this._InputController.Update();
     };
     MainGame.prototype.Draw = function (delta, ctx) {
         this._MapTile.Draw(delta, ctx);
@@ -1847,7 +2440,7 @@ var MainGame = function (_super) {
 }(state_1.State);
 exports.MainGame = MainGame;
 
-},{"../entities/map":76,"../entities/player":77,"./state":83,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],83:[function(require,module,exports){
+},{"../entities/bomb-manager":75,"../entities/map":77,"../entities/player":78,"../input":80,"./state":85,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],85:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1884,7 +2477,7 @@ var State = function () {
 }();
 exports.State = State;
 
-},{}],84:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 "use strict";
 
 var _create = require("babel-runtime/core-js/object/create");
@@ -1934,7 +2527,7 @@ var TitleScreen = function (_super) {
 }(state_1.State);
 exports.TitleScreen = TitleScreen;
 
-},{"../entities/entity":75,"./state":83,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],85:[function(require,module,exports){
+},{"../entities/entity":76,"./state":85,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],87:[function(require,module,exports){
 "use strict";
 
 var _promise = require("babel-runtime/core-js/promise");
@@ -2042,8 +2635,18 @@ function extend(first, second) {
     return result;
 }
 exports.extend = extend;
+/** basic sleep function to be used for async functions */
+function sleep(ms) {
+    if (ms === void 0) {
+        ms = 0;
+    }
+    return new _promise2.default(function (r) {
+        return setTimeout(r, ms);
+    });
+}
+exports.sleep = sleep;
 
-},{"./logger":79,"babel-runtime/core-js/promise":3}],86:[function(require,module,exports){
+},{"./logger":81,"babel-runtime/core-js/promise":3}],88:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -2075,6 +2678,10 @@ var WindowManager = function () {
         if (!this.canvasElementId) {
             document.body.appendChild(this.canvas);
         }
+        this.ctx.mozImageSmoothingEnabled = false;
+        this.ctx.webkitImageSmoothingEnabled = false;
+        // this.ctx.msImageSmoothingEnabled = false;
+        this.ctx.imageSmoothingEnabled = false;
         window.addEventListener('resize', function () {
             _this._onResize();
         }, false);
@@ -2092,7 +2699,7 @@ var WindowManager = function () {
 }();
 exports.WindowManager = WindowManager;
 
-},{"./logger":79}],87:[function(require,module,exports){
+},{"./logger":81}],89:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -2106,6 +2713,6 @@ var myGame = new game_1.Game({
     timeScale: 1
 });
 
-},{"./engine/game":78}]},{},[87])
+},{"./engine/game":79}]},{},[89])
 
 //# sourceMappingURL=bundle.js.map

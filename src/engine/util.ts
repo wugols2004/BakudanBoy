@@ -104,3 +104,10 @@ export function extend<T, U>(first: T, second: U): T & U {
     }
     return result;
 }
+
+/** basic sleep function to be used for async functions */
+export function sleep(ms = 0) {
+    return new Promise(r => setTimeout(r, ms));
+}
+
+

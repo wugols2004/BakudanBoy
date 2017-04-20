@@ -29,8 +29,6 @@ export class Game {
 
   private _currentState: State;
 
-  private _BUTTON_PRESSED: boolean = false;
-
   constructor(options?: IGameOptions) {
 
     this._logger = Logger.getInstance();
@@ -48,6 +46,7 @@ export class Game {
 
   public start() {
     this._currentState = new MainGame();
+    this._currentTick = 0;
     this._update();
   }
 
@@ -61,5 +60,5 @@ export class Game {
 
     requestAnimationFrame(this._update.bind(this))
   }
-
 }
+

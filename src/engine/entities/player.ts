@@ -1,5 +1,7 @@
 import { Entity } from './entity'
 import { MapTile } from './map'
+import { Logger } from '../logger'
+import { BombManager } from './bomb-manager'
 import * as Util from '../util'
 
 export class Player extends Entity {
@@ -11,6 +13,13 @@ export class Player extends Entity {
 	private _mapTile: MapTile = MapTile.getInstance();
 
 	private _playerSpeed: number = 1;
+
+	private _logger: Logger = Logger.getInstance();
+
+	private _bombManager: BombManager = BombManager.getInstance();
+
+	private _playerWidth: number = 15;
+	private _playerHeight: number = 14;
 
 	constructor() {
 		super(0, 0, "front_1.png", 0);
@@ -26,26 +35,31 @@ export class Player extends Entity {
 
 	public Update(delta: number): void {
 		super.Update(delta);
+		this.UpdatePosition();
+	}
+
+	public MoveUp(): void {
+		this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight , -this._playerSpeed);
+	}
+
+	public MoveDown(): void {
+		this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
+	}
+
+	public MoveLeft(): void {
+		this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
+	}
+
+	public MoveRight(): void {
+		this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
+	}
+
+	public DropBomb(): void {
+		this._bombManager.SpawnBomb(this._currentPosition.x,this._currentPosition.y);
 
 	}
 
-	public MoveUp() {
-		this.y -= this._playerSpeed;
-	}
-
-	public MoveDown() {
-		this.y += this._playerSpeed;
-	}
-
-	public MoveLeft() {
-		this.x -= this._playerSpeed;
-	}
-
-	public MoveRight() {
-		this.x += this._playerSpeed;
-	}
-
-	public DropBomb() {
+	public Stop(): void {
 
 	}
 
