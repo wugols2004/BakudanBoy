@@ -16,7 +16,8 @@ enum DIRECTION {
 	UP = 0,
 	DOWN,
 	LEFT,
-	RIGHT
+	RIGHT,
+	COUNT
 }
 
 class BombExplosion {
@@ -207,6 +208,7 @@ class BombExplosion {
 				{
 					MapTile.getInstance().DestroyTile(this.tileX,this.tileY + 1 + i);
 				}
+
 				break;
 			}
 
@@ -220,6 +222,7 @@ class BombExplosion {
 				{
 					MapTile.getInstance().DestroyTile(this.tileX - 1 - i,this.tileY);
 				}
+
 				break;
 			}
 
@@ -233,6 +236,7 @@ class BombExplosion {
 				{
 					MapTile.getInstance().DestroyTile(this.tileX + 1 + i,this.tileY);
 				}
+
 				break;
 			}
 
@@ -325,8 +329,6 @@ class Bomb extends Entity {
 				this._bombAnimObj.onAnimEnd = () => {
 					r(true);
 				}
-
-
 			}
 			catch (err) {
 				Logger.getInstance().error(err.message);

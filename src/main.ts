@@ -9,7 +9,7 @@ var myGame = new Game({
     spriteSheetUrl: [
         '/assets/image/bakudanboy.png',
         '/assets/image/blocks.png',
-        // '/assets/image/enemy.png',
+        '/assets/image/enemy.png',
     ],
     timeScale: 1,
 });

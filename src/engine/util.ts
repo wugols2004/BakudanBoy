@@ -111,3 +111,16 @@ export function sleep(ms = 0) {
 }
 
 
+export function SortArray(values: any[]) {
+    return values.sort((a, b) => {
+        if (a < b) {
+            return -1;
+        }
+
+        if (a > b) {
+            return 1;
+        }
+
+        return 0
+    });
+}

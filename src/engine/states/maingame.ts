@@ -4,6 +4,7 @@ import { MapTile } from '../entities/map'
 import { Player } from '../entities/player'
 import { InputController, InputOptions } from '../input'
 import { BombManager } from '../entities/bomb-manager'
+import { MonsterManager } from '../entities/monster-manager'
 
 export class MainGame extends State {
     // private SprTitleScreen: Entity;
@@ -11,6 +12,7 @@ export class MainGame extends State {
     private _Player: Player;
     private _InputController: InputController;
     private _BombManager: BombManager = BombManager.getInstance();
+    private _MonsterManager: MonsterManager = MonsterManager.getInstance();
 
     constructor() {
         super();
@@ -37,10 +39,13 @@ export class MainGame extends State {
                 ESC_KeyUp: (): void => {}
             }
         );
+
+        this._MonsterManager.init();
     }
 
     public Update(delta: number): void {
         super.Update(delta);
+        this._MonsterManager.Update(delta);
 
         this._InputController.Update();
     }
@@ -48,5 +53,7 @@ export class MainGame extends State {
     public Draw(delta: number, ctx: CanvasRenderingContext2D): void {
         this._MapTile.Draw(delta, ctx);
         super.Draw(delta, ctx);
+
+        this._MonsterManager.Draw(delta,ctx);
     }
 }

@@ -21,6 +21,8 @@ export class Player extends Entity {
 	private _playerWidth: number = 15;
 	private _playerHeight: number = 14;
 
+	private _IsDead: boolean = false;
+
 	constructor() {
 		super(0, 0, "front_1.png", 0);
 
@@ -39,27 +41,28 @@ export class Player extends Entity {
 	}
 
 	public MoveUp(): void {
-		this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight , -this._playerSpeed);
+		if(!this._IsDead)
+			this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight , -this._playerSpeed);
 	}
 
 	public MoveDown(): void {
-		this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
+		if(!this._IsDead)
+			this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
 	}
 
 	public MoveLeft(): void {
-		this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
+		if(!this._IsDead)
+			this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
 	}
 
 	public MoveRight(): void {
-		this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
+		if(!this._IsDead)
+			this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x,this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
 	}
 
 	public DropBomb(): void {
-		this._bombManager.SpawnBomb(this._currentPosition.x,this._currentPosition.y);
-
-	}
-
-	public Stop(): void {
+		if(!this._IsDead)
+			this._bombManager.SpawnBomb(this._currentPosition.x,this._currentPosition.y);
 
 	}
 
@@ -72,4 +75,5 @@ export class Player extends Entity {
 		super.Draw(delta, ctx);
 
 	}
+
 }

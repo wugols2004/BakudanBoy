@@ -1390,6 +1390,7 @@ var DIRECTION;
     DIRECTION[DIRECTION["DOWN"] = 1] = "DOWN";
     DIRECTION[DIRECTION["LEFT"] = 2] = "LEFT";
     DIRECTION[DIRECTION["RIGHT"] = 3] = "RIGHT";
+    DIRECTION[DIRECTION["COUNT"] = 4] = "COUNT";
 })(DIRECTION || (DIRECTION = {}));
 var BombExplosion = function () {
     function BombExplosion(_tileX, _tileY, _bombLength) {
@@ -1645,7 +1646,7 @@ var BombManager = function (_super) {
 BombManager._instance = null;
 exports.BombManager = BombManager;
 
-},{"../logger":81,"../spritesheet":82,"../util":87,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2,"babel-runtime/core-js/promise":3}],76:[function(require,module,exports){
+},{"../logger":82,"../spritesheet":83,"../util":88,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2,"babel-runtime/core-js/promise":3}],76:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1677,7 +1678,7 @@ var Entity = function () {
 }();
 exports.Entity = Entity;
 
-},{"../logger":81,"../spritesheet":82}],77:[function(require,module,exports){
+},{"../logger":82,"../spritesheet":83}],77:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1873,7 +1874,312 @@ var MapTile = function () {
 MapTile._instance = null;
 exports.MapTile = MapTile;
 
-},{"../logger":81,"../spritesheet":82,"../util":87}],78:[function(require,module,exports){
+},{"../logger":82,"../spritesheet":83,"../util":88}],78:[function(require,module,exports){
+"use strict";
+
+var _promise = require("babel-runtime/core-js/promise");
+
+var _promise2 = _interopRequireDefault(_promise);
+
+var _create = require("babel-runtime/core-js/object/create");
+
+var _create2 = _interopRequireDefault(_create);
+
+var _setPrototypeOf = require("babel-runtime/core-js/object/set-prototype-of");
+
+var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var __extends = undefined && undefined.__extends || function () {
+    var extendStatics = _setPrototypeOf2.default || { __proto__: [] } instanceof Array && function (d, b) {
+        d.__proto__ = b;
+    } || function (d, b) {
+        for (var p in b) {
+            if (b.hasOwnProperty(p)) d[p] = b[p];
+        }
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() {
+            this.constructor = d;
+        }
+        d.prototype = b === null ? (0, _create2.default)(b) : (__.prototype = b.prototype, new __());
+    };
+}();
+var __awaiter = undefined && undefined.__awaiter || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = _promise2.default))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function rejected(value) {
+            try {
+                step(generator["throw"](value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function step(result) {
+            result.done ? resolve(result.value) : new P(function (resolve) {
+                resolve(result.value);
+            }).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = undefined && undefined.__generator || function (thisArg, body) {
+    var _ = { label: 0, sent: function sent() {
+            if (t[0] & 1) throw t[1];return t[1];
+        }, trys: [], ops: [] },
+        f,
+        y,
+        t;
+    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    function verb(n) {
+        return function (v) {
+            return step([n, v]);
+        };
+    }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) {
+            try {
+                if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+                if (y = 0, t) op = [0, t.value];
+                switch (op[0]) {
+                    case 0:case 1:
+                        t = op;break;
+                    case 4:
+                        _.label++;return { value: op[1], done: false };
+                    case 5:
+                        _.label++;y = op[1];op = [0];continue;
+                    case 7:
+                        op = _.ops.pop();_.trys.pop();continue;
+                    default:
+                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                            _ = 0;continue;
+                        }
+                        if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                            _.label = op[1];break;
+                        }
+                        if (op[0] === 6 && _.label < t[1]) {
+                            _.label = t[1];t = op;break;
+                        }
+                        if (t && _.label < t[2]) {
+                            _.label = t[2];_.ops.push(op);break;
+                        }
+                        if (t[2]) _.ops.pop();
+                        _.trys.pop();continue;
+                }
+                op = body.call(thisArg, _);
+            } catch (e) {
+                op = [6, e];y = 0;
+            } finally {
+                f = t = 0;
+            }
+        }if (op[0] & 5) throw op[1];return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+exports.__esModule = true;
+var entity_1 = require("./entity");
+var map_1 = require("./map");
+var logger_1 = require("../logger");
+var Util = require("../util");
+var DIRECTION;
+(function (DIRECTION) {
+    DIRECTION[DIRECTION["UP"] = 0] = "UP";
+    DIRECTION[DIRECTION["DOWN"] = 1] = "DOWN";
+    DIRECTION[DIRECTION["LEFT"] = 2] = "LEFT";
+    DIRECTION[DIRECTION["RIGHT"] = 3] = "RIGHT";
+    DIRECTION[DIRECTION["COUNT"] = 4] = "COUNT";
+})(DIRECTION || (DIRECTION = {}));
+var Monster = function (_super) {
+    __extends(Monster, _super);
+    function Monster(tilex, tiley) {
+        var _this = _super.call(this, 0, 0, "front_1_enemy.png", 2) || this;
+        _this._offsetPosition = new Util.Vector2(1, -10);
+        _this._mapTile = map_1.MapTile.getInstance();
+        _this._monsterVectorY = 0;
+        _this._monsterVectorX = 0;
+        _this._monsterTargetX = 0;
+        _this._monsterTargetY = 0;
+        _this._monsterSpeed = 0;
+        _this._logger = logger_1.Logger.getInstance();
+        _this._monsterWidth = 15;
+        _this._monsterHeight = 14;
+        _this._stopThinking = false;
+        _this._maxTileWalk = 10;
+        _this._walkPath = [];
+        _this.Spawn(tilex, tiley);
+        return _this;
+    }
+    Monster.prototype.Spawn = function (tilex, tiley) {
+        this._currentPosition = this._mapTile.getTileScreenPosition(tilex, tiley);
+        this.UpdatePosition();
+        this._Think();
+    };
+    Monster.prototype.Update = function (delta) {
+        _super.prototype.Update.call(this, delta);
+        this.UpdatePosition();
+    };
+    Monster.prototype.UpdatePosition = function () {
+        this._currentPosition.x += this._monsterVectorX;
+        this._currentPosition.y += this._monsterVectorY;
+        if (this._currentPosition.x === this._monsterTargetX && this._currentPosition.y === this._monsterTargetY) {
+            this._monsterVectorX = 0;
+            this._monsterVectorY = 0;
+            this._moveDone();
+        }
+        this.x = this._currentPosition.x + this._offsetPosition.x;
+        this.y = this._currentPosition.y + this._offsetPosition.y;
+        ;
+    };
+    Monster.prototype.Draw = function (delta, ctx) {
+        _super.prototype.Draw.call(this, delta, ctx);
+    };
+    Monster.prototype._Think = function () {
+        if (this._stopThinking) return;
+        var currentTilePos = this._mapTile.getScreenToTilePosition(this._currentPosition.x, this._currentPosition.y);
+        var count = [0, 0, 0, 0];
+        this._walkPath.length = 0;
+        //check neighbors for longest tile then turn once
+        for (var i = 1; i <= this._maxTileWalk; i++) {
+            var block = this._mapTile.getTile(currentTilePos.x, currentTilePos.y - i);
+            if (block !== map_1.Block.GROUND) {
+                break;
+            }
+            count[DIRECTION.UP]++;
+        }
+        for (var i = 1; i <= this._maxTileWalk; i++) {
+            var block = this._mapTile.getTile(currentTilePos.x, currentTilePos.y + i);
+            if (block !== map_1.Block.GROUND) {
+                break;
+            }
+            count[DIRECTION.DOWN]++;
+        }
+        for (var i = 1; i <= this._maxTileWalk; i++) {
+            var block = this._mapTile.getTile(currentTilePos.x + i, currentTilePos.y);
+            if (block !== map_1.Block.GROUND) {
+                break;
+            }
+            count[DIRECTION.RIGHT]++;
+        }
+        for (var i = 1; i <= this._maxTileWalk; i++) {
+            var block = this._mapTile.getTile(currentTilePos.x - i, currentTilePos.y);
+            if (block !== map_1.Block.GROUND) {
+                break;
+            }
+            count[DIRECTION.LEFT]++;
+        }
+        var max = 0;
+        for (var i = 1; i < count.length; i++) {
+            if (count[i] > count[i - 1]) {
+                max = i;
+            }
+        }
+        var lastWalkPos = new Util.Vector2(currentTilePos.x, currentTilePos.y);
+        for (var i = 1; i <= count[max]; i++) {
+            var offX = 0;
+            var offY = 0;
+            if (max == DIRECTION.UP) offY = -1;else if (max == DIRECTION.DOWN) offY = 1;else if (max == DIRECTION.LEFT) offX = -1;else if (max == DIRECTION.RIGHT) offX = 1;
+            lastWalkPos.x += offX;
+            lastWalkPos.y += offY;
+            this._walkPath.push(new Util.Vector2(offX, offY));
+        }
+        this._stopThinking = true;
+        this._ProcessMovement();
+    };
+    Monster.prototype._ProcessMovement = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _i, _a, path;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _i = 0, _a = this._walkPath;
+                        _b.label = 1;
+                    case 1:
+                        if (!(_i < _a.length)) return [3 /*break*/, 4];
+                        path = _a[_i];
+                        return [4 /*yield*/, this._MoveToTile(path)];
+                    case 2:
+                        _b.sent();
+                        _b.label = 3;
+                    case 3:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 4:
+                        this._stopThinking = false;
+                        this._Think();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Monster.prototype._MoveToTile = function (path) {
+        var _this = this;
+        return new _promise2.default(function (r, e) {
+            try {
+                var vec2 = _this._mapTile.getScreenToTilePosition(_this._currentPosition.x, _this._currentPosition.y);
+                _this._monsterVectorX = path.x;
+                _this._monsterVectorY = path.y;
+                // Logger.getInstance().debug(this._monsterVectorX, this._monsterVectorY, path, vec2);
+                var targetVec2 = _this._mapTile.getTileScreenPosition(vec2.x + path.x, vec2.y + path.y);
+                _this._monsterTargetX = targetVec2.x;
+                _this._monsterTargetY = targetVec2.y;
+                _this._moveDone = function () {
+                    r(true);
+                };
+            } catch (err) {
+                e(err);
+            }
+        });
+    };
+    Monster.prototype.DestroyMonster = function () {};
+    return Monster;
+}(entity_1.Entity);
+var MonsterManager = function () {
+    function MonsterManager() {
+        this._Monsters = [];
+        if (MonsterManager._instance) {
+            throw new Error('Logger is a singleton');
+        }
+        MonsterManager._instance = this;
+        return MonsterManager._instance;
+    }
+    MonsterManager.getInstance = function () {
+        if (MonsterManager._instance == null) {
+            MonsterManager._instance = new MonsterManager();
+        }
+        return MonsterManager._instance;
+    };
+    MonsterManager.prototype.Update = function (delta) {
+        this._Monsters.forEach(function (monster) {
+            monster.Update(delta);
+        });
+    };
+    MonsterManager.prototype.Draw = function (delta, ctx) {
+        this._Monsters.forEach(function (monster) {
+            monster.Draw(delta, ctx);
+        });
+    };
+    MonsterManager.prototype.SpawnMonster = function (tileX, tileY) {
+        this._Monsters.push(new Monster(tileX, tileY));
+    };
+    MonsterManager.prototype.init = function () {
+        this.SpawnMonster(1, 13);
+        this.SpawnMonster(19, 13);
+        this.SpawnMonster(19, 1);
+    };
+    return MonsterManager;
+}();
+MonsterManager._instance = null;
+exports.MonsterManager = MonsterManager;
+
+},{"../logger":82,"../util":88,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2,"babel-runtime/core-js/promise":3}],79:[function(require,module,exports){
 "use strict";
 
 var _create = require("babel-runtime/core-js/object/create");
@@ -1919,6 +2225,7 @@ var Player = function (_super) {
         _this._bombManager = bomb_manager_1.BombManager.getInstance();
         _this._playerWidth = 15;
         _this._playerHeight = 14;
+        _this._IsDead = false;
         _this.Spawn();
         return _this;
     }
@@ -1931,21 +2238,20 @@ var Player = function (_super) {
         this.UpdatePosition();
     };
     Player.prototype.MoveUp = function () {
-        this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
+        if (!this._IsDead) this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
     };
     Player.prototype.MoveDown = function () {
-        this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
+        if (!this._IsDead) this._currentPosition.y = this._mapTile.checkMoveForCollisionY(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
     };
     Player.prototype.MoveLeft = function () {
-        this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
+        if (!this._IsDead) this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, -this._playerSpeed);
     };
     Player.prototype.MoveRight = function () {
-        this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
+        if (!this._IsDead) this._currentPosition.x = this._mapTile.checkMoveForCollisionX(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight, this._playerSpeed);
     };
     Player.prototype.DropBomb = function () {
-        this._bombManager.SpawnBomb(this._currentPosition.x, this._currentPosition.y);
+        if (!this._IsDead) this._bombManager.SpawnBomb(this._currentPosition.x, this._currentPosition.y);
     };
-    Player.prototype.Stop = function () {};
     Player.prototype.UpdatePosition = function () {
         this.x = this._currentPosition.x + this._offsetPosition.x;
         this.y = this._currentPosition.y + this._offsetPosition.y;
@@ -1957,7 +2263,7 @@ var Player = function (_super) {
 }(entity_1.Entity);
 exports.Player = Player;
 
-},{"../logger":81,"../util":87,"./bomb-manager":75,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],79:[function(require,module,exports){
+},{"../logger":82,"../util":88,"./bomb-manager":75,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],80:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1995,7 +2301,7 @@ var Game = function () {
 }();
 exports.Game = Game;
 
-},{"./logger":81,"./spritesheet":82,"./states/index":83,"./window-manager":88}],80:[function(require,module,exports){
+},{"./logger":82,"./spritesheet":83,"./states/index":84,"./window-manager":89}],81:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -2037,7 +2343,7 @@ var InputController = function () {
 }();
 exports.InputController = InputController;
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -2136,7 +2442,7 @@ var Logger = function () {
 Logger._instance = null;
 exports.Logger = Logger;
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 "use strict";
 
 var _promise = require("babel-runtime/core-js/promise");
@@ -2335,7 +2641,7 @@ var SpriteSheet = function () {
 SpriteSheet._instance = null;
 exports.SpriteSheet = SpriteSheet;
 
-},{"./logger":81,"./util":87,"babel-runtime/core-js/promise":3}],83:[function(require,module,exports){
+},{"./logger":82,"./util":88,"babel-runtime/core-js/promise":3}],84:[function(require,module,exports){
 "use strict";
 
 function __export(m) {
@@ -2348,7 +2654,7 @@ __export(require("./state"));
 __export(require("./titlescreen"));
 __export(require("./maingame"));
 
-},{"./maingame":84,"./state":85,"./titlescreen":86}],84:[function(require,module,exports){
+},{"./maingame":85,"./state":86,"./titlescreen":87}],85:[function(require,module,exports){
 "use strict";
 
 var _create = require("babel-runtime/core-js/object/create");
@@ -2383,11 +2689,13 @@ var map_1 = require("../entities/map");
 var player_1 = require("../entities/player");
 var input_1 = require("../input");
 var bomb_manager_1 = require("../entities/bomb-manager");
+var monster_manager_1 = require("../entities/monster-manager");
 var MainGame = function (_super) {
     __extends(MainGame, _super);
     function MainGame() {
         var _this = _super.call(this) || this;
         _this._BombManager = bomb_manager_1.BombManager.getInstance();
+        _this._MonsterManager = monster_manager_1.MonsterManager.getInstance();
         _this._MapTile = map_1.MapTile.getInstance();
         _this.addEntities(_this._BombManager);
         _this._Player = new player_1.Player();
@@ -2426,21 +2734,24 @@ var MainGame = function (_super) {
             },
             ESC_KeyUp: function ESC_KeyUp() {}
         });
+        _this._MonsterManager.init();
         return _this;
     }
     MainGame.prototype.Update = function (delta) {
         _super.prototype.Update.call(this, delta);
+        this._MonsterManager.Update(delta);
         this._InputController.Update();
     };
     MainGame.prototype.Draw = function (delta, ctx) {
         this._MapTile.Draw(delta, ctx);
         _super.prototype.Draw.call(this, delta, ctx);
+        this._MonsterManager.Draw(delta, ctx);
     };
     return MainGame;
 }(state_1.State);
 exports.MainGame = MainGame;
 
-},{"../entities/bomb-manager":75,"../entities/map":77,"../entities/player":78,"../input":80,"./state":85,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],85:[function(require,module,exports){
+},{"../entities/bomb-manager":75,"../entities/map":77,"../entities/monster-manager":78,"../entities/player":79,"../input":81,"./state":86,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],86:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -2477,7 +2788,7 @@ var State = function () {
 }();
 exports.State = State;
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 "use strict";
 
 var _create = require("babel-runtime/core-js/object/create");
@@ -2527,7 +2838,7 @@ var TitleScreen = function (_super) {
 }(state_1.State);
 exports.TitleScreen = TitleScreen;
 
-},{"../entities/entity":76,"./state":85,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],87:[function(require,module,exports){
+},{"../entities/entity":76,"./state":86,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],88:[function(require,module,exports){
 "use strict";
 
 var _promise = require("babel-runtime/core-js/promise");
@@ -2645,8 +2956,20 @@ function sleep(ms) {
     });
 }
 exports.sleep = sleep;
+function SortArray(values) {
+    return values.sort(function (a, b) {
+        if (a < b) {
+            return -1;
+        }
+        if (a > b) {
+            return 1;
+        }
+        return 0;
+    });
+}
+exports.SortArray = SortArray;
 
-},{"./logger":81,"babel-runtime/core-js/promise":3}],88:[function(require,module,exports){
+},{"./logger":82,"babel-runtime/core-js/promise":3}],89:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -2699,7 +3022,7 @@ var WindowManager = function () {
 }();
 exports.WindowManager = WindowManager;
 
-},{"./logger":81}],89:[function(require,module,exports){
+},{"./logger":82}],90:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -2709,10 +3032,10 @@ var myGame = new game_1.Game({
     width: 336,
     height: 240,
     canvasElementId: 'canvas-game',
-    spriteSheetUrl: ['/assets/image/bakudanboy.png', '/assets/image/blocks.png'],
+    spriteSheetUrl: ['/assets/image/bakudanboy.png', '/assets/image/blocks.png', '/assets/image/enemy.png'],
     timeScale: 1
 });
 
-},{"./engine/game":79}]},{},[89])
+},{"./engine/game":80}]},{},[90])
 
 //# sourceMappingURL=bundle.js.map
