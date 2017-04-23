@@ -67,4 +67,8 @@ export class InputController {
         var kcode = e.which || e.keyCode;
         this._keyPressed[kcode] = false;
     }
+
+    public clearInputs () {
+        this._InputOptions = null;
+    }
 }

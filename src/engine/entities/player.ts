@@ -23,6 +23,8 @@ export class Player extends Entity {
 
 	private _IsDead: boolean = false;
 
+	private _JustBombDroppedRect: Util.cRectangle = null;
+
 	constructor() {
 		super(0, 0, "front_1.png", 0);
 
@@ -61,14 +63,23 @@ export class Player extends Entity {
 	}
 
 	public DropBomb(): void {
-		if(!this._IsDead)
-			this._bombManager.SpawnBomb(this._currentPosition.x,this._currentPosition.y);
+		if(!this._IsDead){
+			this._JustBombDroppedRect = this._bombManager.SpawnBomb(this._currentPosition.x,this._currentPosition.y);
+		}
 
 	}
 
 	public UpdatePosition() {
 		this.x = this._currentPosition.x + this._offsetPosition.x;
 		this.y = this._currentPosition.y + this._offsetPosition.y;
+
+		// if(this._JustBombDroppedRect !== null) {
+		// 	let playerRect = new Util.cRectangle(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight);
+		// 	if(!playerRect.within(this._JustBombDroppedRect)){
+		// 		this._mapTile.MarkTileBomb(this._JustBombDroppedRect.x,this._JustBombDroppedRect.y);
+		// 		this._JustBombDroppedRect = null;
+		// 	}
+		// }
 	}
 
 	public Draw(delta: number, ctx: CanvasRenderingContext2D): void {

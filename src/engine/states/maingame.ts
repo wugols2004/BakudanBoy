@@ -40,13 +40,12 @@ export class MainGame extends State {
             }
         );
 
-        this._MonsterManager.init();
+        this._MonsterManager.init(this._Player);
     }
 
     public Update(delta: number): void {
         super.Update(delta);
         this._MonsterManager.Update(delta);
-
         this._InputController.Update();
     }
 

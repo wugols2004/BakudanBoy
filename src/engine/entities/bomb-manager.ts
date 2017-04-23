@@ -3,6 +3,7 @@ import { MapTile, Block } from './map'
 import { Logger } from '../logger'
 import * as Util from '../util'
 import { SpriteSheet } from '../spritesheet'
+import { MonsterManager, Monster } from './monster-manager'
 
 const _BOMB_TIME_OUT: number = 3000;
 
@@ -149,13 +150,13 @@ class BombExplosion {
 		//draw center
 		this._SpriteSheet.Draw(0, 0, 1, this._fireCrossAnim[this._currentAnimIdx], ctx);
 		//vertical
-		for (let i = 1; i <= this._BombExplosionLengthArr[DIRECTION.UP]; i++){
+		for (let i = 1; i <= this._BombExplosionLengthArr[DIRECTION.UP]; i++) {
 			if (i === (this._bombLength))
 				this._SpriteSheet.Draw(0, -16 * i, 1, this._fireUpAnim[this._currentAnimIdx], ctx);
 			else
 				this._SpriteSheet.Draw(0, -16 * i, 1, this._fireExtVerticalAnim[this._currentAnimIdx], ctx);
 		}
-		for (let i = 1; i <= this._BombExplosionLengthArr[DIRECTION.DOWN]; i++){
+		for (let i = 1; i <= this._BombExplosionLengthArr[DIRECTION.DOWN]; i++) {
 			if (i === (this._bombLength))
 				this._SpriteSheet.Draw(0, 16 * i, 1, this._fireDownAnim[this._currentAnimIdx], ctx);
 			else
@@ -163,14 +164,14 @@ class BombExplosion {
 		}
 
 		//horizontal
-		for (let i = 1; i <= this._BombExplosionLengthArr[DIRECTION.RIGHT]; i++){
+		for (let i = 1; i <= this._BombExplosionLengthArr[DIRECTION.RIGHT]; i++) {
 			if (i === (this._bombLength))
 				this._SpriteSheet.Draw(16 * i, 0, 1, this._fireRightAnim[this._currentAnimIdx], ctx);
 			else
 				this._SpriteSheet.Draw(16 * i, 0, 1, this._fireExtHorizontalAnim[this._currentAnimIdx], ctx);
 		}
 
-		for (let i = 1; i <= this._BombExplosionLengthArr[DIRECTION.LEFT]; i++){
+		for (let i = 1; i <= this._BombExplosionLengthArr[DIRECTION.LEFT]; i++) {
 			if (i === (this._bombLength))
 				this._SpriteSheet.Draw(-16 * i, 0, 1, this._fireLeftAnim[this._currentAnimIdx], ctx);
 			else
@@ -185,60 +186,102 @@ class BombExplosion {
 	}
 
 	private _CheckBounds(): number[] {
-		var boundarray = [0,0,0,0];
+		let boundarray = [0, 0, 0, 0];
+		let monsters = MonsterManager.getInstance().GetMonsters();
+
 
 		for (let i = 0; i < this._bombLength; i++) {
-			let block = MapTile.getInstance().getTile(this.tileX, this.tileY - 1 - i);
-			if ( block != Block.GROUND) {
-				if(block == Block.BREAKBLOCK)
-				{
-					MapTile.getInstance().DestroyTile(this.tileX,this.tileY - 1 - i);
+			let offset = - 1 - i;
+			let block = MapTile.getInstance().getTile(this.tileX, this.tileY + offset);
+			if (block != Block.GROUND) {
+				if (block == Block.BREAKBLOCK) {
+					MapTile.getInstance().DestroyTile(this.tileX, this.tileY + offset);
 				}
-
 				break;
 			}
+
+			let tileRect = MapTile.getInstance().GetTileBounds(this.tileX, this.tileY + offset);
+
+			//Check for Hits
+			monsters.forEach((monster) => {
+				if (!monster.isHit) {
+					// if (tileRect.within(monster.GetHitBounds()))
+					if (monster.GetHitBounds().within(tileRect))
+						monster.Die();
+				}
+			});
 
 			boundarray[DIRECTION.UP]++;
 		}
 
 		for (let i = 0; i < this._bombLength; i++) {
-			let block = MapTile.getInstance().getTile(this.tileX, this.tileY + 1 + i);
-			if ( block != Block.GROUND) {
-				if(block == Block.BREAKBLOCK)
-				{
-					MapTile.getInstance().DestroyTile(this.tileX,this.tileY + 1 + i);
+			let offset = 1 + i;
+			let block = MapTile.getInstance().getTile(this.tileX, this.tileY + offset);
+			if (block != Block.GROUND) {
+				if (block == Block.BREAKBLOCK) {
+					MapTile.getInstance().DestroyTile(this.tileX, this.tileY + offset);
 				}
 
 				break;
 			}
+
+			let tileRect = MapTile.getInstance().GetTileBounds(this.tileX, this.tileY + offset);
+
+			//Check for Hits
+			monsters.forEach((monster) => {
+				if (!monster.isHit) {
+					if (monster.GetHitBounds().within(tileRect))
+						monster.Die();
+				}
+			});
 
 			boundarray[DIRECTION.DOWN]++;
 		}
 
 		for (let i = 0; i < this._bombLength; i++) {
-			let block = MapTile.getInstance().getTile(this.tileX - 1 - i, this.tileY);
+			let offset = - 1 - i;
+			let block = MapTile.getInstance().getTile(this.tileX + offset, this.tileY);
 			if (block != Block.GROUND) {
-				if(block == Block.BREAKBLOCK)
-				{
-					MapTile.getInstance().DestroyTile(this.tileX - 1 - i,this.tileY);
+				if (block == Block.BREAKBLOCK) {
+					MapTile.getInstance().DestroyTile(this.tileX + offset, this.tileY);
 				}
 
 				break;
 			}
+
+			let tileRect = MapTile.getInstance().GetTileBounds(this.tileX + offset, this.tileY);
+
+			//Check for Hits
+			monsters.forEach((monster) => {
+				if (!monster.isHit) {
+					if (monster.GetHitBounds().within(tileRect))
+						monster.Die();
+				}
+			});
 
 			boundarray[DIRECTION.LEFT]++;
 		}
 
 		for (let i = 0; i < this._bombLength; i++) {
-			let block = MapTile.getInstance().getTile(this.tileX + 1 + i, this.tileY);
+			let offset = 1 + i;
+			let block = MapTile.getInstance().getTile(this.tileX + offset, this.tileY);
 			if (block != Block.GROUND) {
-				if(block == Block.BREAKBLOCK)
-				{
-					MapTile.getInstance().DestroyTile(this.tileX + 1 + i,this.tileY);
+				if (block == Block.BREAKBLOCK) {
+					MapTile.getInstance().DestroyTile(this.tileX + offset, this.tileY);
 				}
 
 				break;
 			}
+
+			let tileRect = MapTile.getInstance().GetTileBounds(this.tileX + offset, this.tileY);
+
+			//Check for Hits
+			monsters.forEach((monster) => {
+				if (!monster.isHit) {
+					if (monster.GetHitBounds().within(tileRect))
+						monster.Die();
+				}
+			});
 
 			boundarray[DIRECTION.RIGHT]++;
 		}
@@ -356,9 +399,9 @@ export class BombManager extends Entity {
 		return BombManager._instance;
 	}
 
-	public SpawnBomb(posX: number, posY: number) {
+	public SpawnBomb(posX: number, posY: number): Util.cRectangle {
 		if (this._bombs.length >= this._MaxBomb)
-			return;
+			return null;
 
 		let vec2 = this._MapTile.getScreenToTilePosition(posX, posY);
 		let found = false;
@@ -372,6 +415,8 @@ export class BombManager extends Entity {
 		if (!found) {
 			this._bombs.push(new Bomb(vec2.x, vec2.y));
 		}
+
+		return this._MapTile.GetTileBounds(vec2.x,vec2.y);
 	}
 
 	public Update(delta: number): void {

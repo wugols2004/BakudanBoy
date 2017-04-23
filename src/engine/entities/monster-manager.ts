@@ -3,6 +3,7 @@ import { MapTile, Block } from './map'
 import { Logger } from '../logger'
 import * as Util from '../util'
 import { SpriteSheet } from '../spritesheet'
+import { Player } from './player'
 
 enum DIRECTION {
 	UP = 0,
@@ -12,7 +13,7 @@ enum DIRECTION {
 	COUNT
 }
 
-class Monster extends Entity {
+export class Monster extends Entity {
 	private _currentPosition: Util.Vector2;
 
 	private _offsetPosition: Util.Vector2 = new Util.Vector2(1, -10);
@@ -36,16 +37,22 @@ class Monster extends Entity {
 	private _maxTileWalk: number = 10;
 	private _walkPath: Util.Vector2[] = [];
 
+	private _MonsterManager: MonsterManager;
+
 	private _moveDone: () => void;
 
-	constructor(tilex: number, tiley: number) {
+	public isHit: boolean = false;
+
+	constructor(manager: MonsterManager, tilex: number, tiley: number) {
 		super(0, 0, "front_1_enemy.png", 2);
 
-		this.Spawn(tilex, tiley);
+		this.Spawn(manager, tilex, tiley);
 	}
 
-	public Spawn(tilex: number, tiley: number) {
+	public Spawn(manager: MonsterManager, tilex: number, tiley: number) {
+		this._MonsterManager = manager;
 		this._currentPosition = this._mapTile.getTileScreenPosition(tilex, tiley);
+		this._isHit = false;
 		this.UpdatePosition();
 		this._Think();
 	}
@@ -180,14 +187,25 @@ class Monster extends Entity {
 		});
 	}
 
-	public DestroyMonster() {
+	public GetHitBounds(): Util.cRectangle{
+		let rect = new Util.cRectangle(this._currentPosition.x,this._currentPosition.y,this._monsterWidth,this._monsterHeight);
+		Logger.getInstance().debug(rect);
+		return rect;
+	}
 
+	public async Die() {
+		Logger.getInstance().debug("Monster Die!");
+		this.isHit = true;
+		this.imageName = "dead_1_enemy.png";
+		await Util.sleep(1000);
+		this._MonsterManager.DeleteMonster(this);
 	}
 }
 
 export class MonsterManager {
 	private static _instance: MonsterManager = null;
 	private _Monsters: Monster[] = [];
+	private _Player: Player = null;
 
 	constructor() {
 		if (MonsterManager._instance) {
@@ -218,12 +236,23 @@ export class MonsterManager {
 	}
 
 	public SpawnMonster(tileX: number, tileY: number) {
-		this._Monsters.push(new Monster(tileX, tileY));
+		this._Monsters.push(new Monster(this,tileX, tileY));
 	}
 
-	public init() {
+	public init(player: Player) {
+		this._Player = player;
+
 		this.SpawnMonster(1, 13);
 		this.SpawnMonster(19,13);
 		this.SpawnMonster(19,1);
+	}
+
+	public GetMonsters (): Monster[] {
+		return this._Monsters;
+	}
+
+	public DeleteMonster(monster: Monster) {
+		let idx = this._Monsters.indexOf(monster);
+		this._Monsters.splice(idx, 1);
 	}
 }

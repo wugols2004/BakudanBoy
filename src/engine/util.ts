@@ -124,3 +124,13 @@ export function SortArray(values: any[]) {
         return 0
     });
 }
+
+export function CircleCollision(obj1: Vector2, obj2: Vector2, rad1: number, rad2: number): boolean{
+    let hit = false;
+
+    // Get distance with Pythagoras
+    let squaredist = (obj1.x * obj2.x) + (obj1.y * obj2.y);
+    hit =  squaredist <= (rad1 + rad2) * (rad1 + rad2);
+
+    return hit;
+}

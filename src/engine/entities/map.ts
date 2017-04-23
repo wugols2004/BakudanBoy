@@ -20,7 +20,7 @@ export enum Block {
     GROUND,
     GROUND2,
     BREAKBLOCK,
-    BOMB
+    GROUNDBOMB
 }
 
 class BreakBlockAnim {
@@ -139,6 +139,7 @@ export class MapTile {
             this._mapOption.groundImg,
             this._mapOption.ground2Img,
             this._mapOption.breakableImg,
+            this._mapOption.groundImg
         ];
 
         this._mapData.length = 0;
@@ -296,11 +297,25 @@ export class MapTile {
     }
 
     public DestroyTile(tilex: number, tiley: number) {
-        this._blockAnim.push(new BreakBlockAnim(tilex,tiley,(bomb)=>{
-            var idx = this._blockAnim.indexOf(bomb);
+        this._blockAnim.push(new BreakBlockAnim(tilex,tiley,(block)=>{
+            var idx = this._blockAnim.indexOf(block);
             this._blockAnim.splice(idx,1);
         }));
 
         this._mapData[tilex + (tiley * this._mapOption.width)] = Block.GROUND;
+    }
+
+    public GetTileBounds(tilex: number, tiley: number): Util.cRectangle {
+        let vec2 = this.getTileScreenPosition(tilex,tiley);
+
+        return new Util.cRectangle(vec2.x,vec2.y,this._mapOption.tileWidth,this._mapOption.tileHeight);
+    }
+
+    public MarkTileBomb(posX: number, posY: number): Util.cRectangle {
+        let tile = this.getScreenToTilePosition(posX,posY);
+
+        this._mapData[tile.x + (tile.y * this._mapOption.width)] = Block.GROUNDBOMB;
+
+        return this.GetTileBounds(tile.x,tile.y);
     }
 }
