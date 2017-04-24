@@ -93,7 +93,7 @@ export class MapTile {
         height: 15,
         tileWidth: 16,
         tileHeight: 16,
-        breakBlockChance: 40,
+        breakBlockChance: 10,
         blockImg: 'blocks_02.png',
         groundImg: 'blocks_04.png',
         ground2Img: 'blocks_05.png',

@@ -2,6 +2,7 @@ import { IGameOptions } from './game'
 import { Logger } from './logger'
 
 export class WindowManager {
+    private static _instance: WindowManager = null;
 
     private _options: IGameOptions;
     private _logger: Logger;
@@ -17,9 +18,23 @@ export class WindowManager {
     public canvasHeight: number;
 
     constructor(options?: IGameOptions) {
+        if (WindowManager._instance) {
+            throw new Error('Logger is a singleton');
+        }
         this._options = options;
         this._logger = Logger.getInstance();
         this._initialize();
+        WindowManager._instance = this;
+
+        return WindowManager._instance;
+    }
+
+    public static getInstance(): WindowManager {
+        if (WindowManager._instance == null) {
+
+            WindowManager._instance = new WindowManager();
+        }
+        return WindowManager._instance;
     }
 
     private _initialize() {

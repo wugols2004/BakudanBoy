@@ -70,6 +70,8 @@ export class cRectangle {
 
     within(outer_rect: cRectangle): boolean {
 
+        Logger.getInstance().debug(this, outer_rect);
+
         if (outer_rect.x > this.x) {
             // this is not in it;
             return false;

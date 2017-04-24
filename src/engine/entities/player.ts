@@ -25,13 +25,19 @@ export class Player extends Entity {
 
 	private _JustBombDroppedRect: Util.cRectangle = null;
 
-	constructor() {
+	private _EndGame: ()=>void = null;
+
+	constructor(endgame: ()=>void) {
 		super(0, 0, "front_1.png", 0);
+
+		this._EndGame = endgame;
 
 		this.Spawn();
 	}
 
 	public Spawn() {
+		this._IsDead = false;
+		this.imageName = "front_1.png";
 		this._currentPosition = this._mapTile.getTileScreenPosition(1, 1);
 		this.UpdatePosition();
 
@@ -69,6 +75,14 @@ export class Player extends Entity {
 
 	}
 
+	public async Die() {
+		Logger.getInstance().debug("Monster Die!");
+		this._IsDead = true;
+		this.imageName = "dead_1.png";
+		await Util.sleep(1000);
+		this._EndGame();
+	}
+
 	public UpdatePosition() {
 		this.x = this._currentPosition.x + this._offsetPosition.x;
 		this.y = this._currentPosition.y + this._offsetPosition.y;
@@ -87,4 +101,8 @@ export class Player extends Entity {
 
 	}
 
+	public GetHitBounds(): Util.cRectangle{
+		let rect = new Util.cRectangle(this._currentPosition.x,this._currentPosition.y,this._playerWidth,this._playerHeight);
+		return rect;
+	}
 }

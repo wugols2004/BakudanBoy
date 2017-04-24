@@ -113,7 +113,7 @@ class BombExplosion {
 
 		this._bombLength = _bombLength;
 
-		this._BombExplosionLengthArr = this._CheckBounds();
+		this._BombExplosionLengthArr = this._CheckExplosionBounds();
 	}
 
 	public update() {
@@ -137,6 +137,58 @@ class BombExplosion {
 						this._isReverse = true;
 					}
 				}
+			}
+
+			this._CheckBombHit();
+		}
+
+	}
+
+	private _CheckBombHit(){
+		var monsters = MonsterManager.getInstance().GetMonsters();
+		var player = MonsterManager.getInstance().GetPlayers();
+
+		// horizontal
+		{
+			let leftCnt = this._BombExplosionLengthArr[DIRECTION.LEFT];
+			let rightCnt = this._BombExplosionLengthArr[DIRECTION.RIGHT];
+			let leftX = (leftCnt * 16 * -1);
+			let rightX = (rightCnt * 16);
+
+			let tileRect = new Util.cRectangle(leftX + this.screenX,this.screenY,rightX + Math.abs(leftX) + 16,16);
+
+			//Check for Hits
+			monsters.forEach((monster) => {
+				if (!monster.isHit) {
+					if (monster.GetHitBounds().within(tileRect))
+						monster.Die();
+				}
+			});
+
+			if(player.GetHitBounds().within(tileRect)){
+				player.Die();
+			}
+		}
+
+		// verticalsada
+		{
+			let upCnt = this._BombExplosionLengthArr[DIRECTION.UP];
+			let downCnt = this._BombExplosionLengthArr[DIRECTION.DOWN];
+			let upX = (leftCnt * 16 * -1);
+			let downX = (downCnt * 16);
+
+			let tileRect = new Util.cRectangle(this.screenX,upX + this.screenY,16,downX + Math.abs(upX) + 16);
+
+			//Check for Hits
+			monsters.forEach((monster) => {
+				if (!monster.isHit) {
+					if (monster.GetHitBounds().within(tileRect))
+						monster.Die();
+				}
+			});
+
+			if(player.GetHitBounds().within(tileRect)){
+				player.Die();
 			}
 		}
 
@@ -185,9 +237,8 @@ class BombExplosion {
 		return this._isDone;
 	}
 
-	private _CheckBounds(): number[] {
+	private _CheckExplosionBounds(): number[] {
 		let boundarray = [0, 0, 0, 0];
-		let monsters = MonsterManager.getInstance().GetMonsters();
 
 
 		for (let i = 0; i < this._bombLength; i++) {
@@ -199,17 +250,6 @@ class BombExplosion {
 				}
 				break;
 			}
-
-			let tileRect = MapTile.getInstance().GetTileBounds(this.tileX, this.tileY + offset);
-
-			//Check for Hits
-			monsters.forEach((monster) => {
-				if (!monster.isHit) {
-					// if (tileRect.within(monster.GetHitBounds()))
-					if (monster.GetHitBounds().within(tileRect))
-						monster.Die();
-				}
-			});
 
 			boundarray[DIRECTION.UP]++;
 		}
@@ -225,16 +265,6 @@ class BombExplosion {
 				break;
 			}
 
-			let tileRect = MapTile.getInstance().GetTileBounds(this.tileX, this.tileY + offset);
-
-			//Check for Hits
-			monsters.forEach((monster) => {
-				if (!monster.isHit) {
-					if (monster.GetHitBounds().within(tileRect))
-						monster.Die();
-				}
-			});
-
 			boundarray[DIRECTION.DOWN]++;
 		}
 
@@ -249,16 +279,6 @@ class BombExplosion {
 				break;
 			}
 
-			let tileRect = MapTile.getInstance().GetTileBounds(this.tileX + offset, this.tileY);
-
-			//Check for Hits
-			monsters.forEach((monster) => {
-				if (!monster.isHit) {
-					if (monster.GetHitBounds().within(tileRect))
-						monster.Die();
-				}
-			});
-
 			boundarray[DIRECTION.LEFT]++;
 		}
 
@@ -272,16 +292,6 @@ class BombExplosion {
 
 				break;
 			}
-
-			let tileRect = MapTile.getInstance().GetTileBounds(this.tileX + offset, this.tileY);
-
-			//Check for Hits
-			monsters.forEach((monster) => {
-				if (!monster.isHit) {
-					if (monster.GetHitBounds().within(tileRect))
-						monster.Die();
-				}
-			});
 
 			boundarray[DIRECTION.RIGHT]++;
 		}

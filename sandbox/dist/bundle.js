@@ -1421,7 +1421,7 @@ var BombExplosion = function () {
         this.screenX = vec2.x;
         this.screenY = vec2.y;
         this._bombLength = _bombLength;
-        this._BombExplosionLengthArr = this._CheckBounds();
+        this._BombExplosionLengthArr = this._CheckExplosionBounds();
     }
     BombExplosion.prototype.update = function () {
         if (!this._isDone) {
@@ -1441,6 +1441,45 @@ var BombExplosion = function () {
                         this._isReverse = true;
                     }
                 }
+            }
+            this._CheckBombHit();
+        }
+    };
+    BombExplosion.prototype._CheckBombHit = function () {
+        var monsters = monster_manager_1.MonsterManager.getInstance().GetMonsters();
+        var player = monster_manager_1.MonsterManager.getInstance().GetPlayers();
+        // horizontal
+        {
+            var leftCnt = this._BombExplosionLengthArr[DIRECTION.LEFT];
+            var rightCnt = this._BombExplosionLengthArr[DIRECTION.RIGHT];
+            var leftX = leftCnt * 16 * -1;
+            var rightX = rightCnt * 16;
+            var tileRect_1 = new Util.cRectangle(leftX + this.screenX, this.screenY, rightX + Math.abs(leftX) + 16, 16);
+            //Check for Hits
+            monsters.forEach(function (monster) {
+                if (!monster.isHit) {
+                    if (monster.GetHitBounds().within(tileRect_1)) monster.Die();
+                }
+            });
+            if (player.GetHitBounds().within(tileRect_1)) {
+                player.Die();
+            }
+        }
+        // verticalsada
+        {
+            var upCnt = this._BombExplosionLengthArr[DIRECTION.UP];
+            var downCnt = this._BombExplosionLengthArr[DIRECTION.DOWN];
+            var upX = leftCnt * 16 * -1;
+            var downX = downCnt * 16;
+            var tileRect_2 = new Util.cRectangle(this.screenX, upX + this.screenY, 16, downX + Math.abs(upX) + 16);
+            //Check for Hits
+            monsters.forEach(function (monster) {
+                if (!monster.isHit) {
+                    if (monster.GetHitBounds().within(tileRect_2)) monster.Die();
+                }
+            });
+            if (player.GetHitBounds().within(tileRect_2)) {
+                player.Die();
             }
         }
     };
@@ -1469,101 +1508,51 @@ var BombExplosion = function () {
     BombExplosion.prototype.isEnd = function () {
         return this._isDone;
     };
-    BombExplosion.prototype._CheckBounds = function () {
+    BombExplosion.prototype._CheckExplosionBounds = function () {
         var boundarray = [0, 0, 0, 0];
-        var monsters = monster_manager_1.MonsterManager.getInstance().GetMonsters();
-        var _loop_1 = function _loop_1(i) {
+        for (var i = 0; i < this._bombLength; i++) {
             var offset = -1 - i;
-            var block = map_1.MapTile.getInstance().getTile(this_1.tileX, this_1.tileY + offset);
+            var block = map_1.MapTile.getInstance().getTile(this.tileX, this.tileY + offset);
             if (block != map_1.Block.GROUND) {
                 if (block == map_1.Block.BREAKBLOCK) {
-                    map_1.MapTile.getInstance().DestroyTile(this_1.tileX, this_1.tileY + offset);
+                    map_1.MapTile.getInstance().DestroyTile(this.tileX, this.tileY + offset);
                 }
-                return "break";
+                break;
             }
-            var tileRect = map_1.MapTile.getInstance().GetTileBounds(this_1.tileX, this_1.tileY + offset);
-            //Check for Hits
-            monsters.forEach(function (monster) {
-                if (!monster.isHit) {
-                    // if (tileRect.within(monster.GetHitBounds()))
-                    if (monster.GetHitBounds().within(tileRect)) monster.Die();
-                }
-            });
             boundarray[DIRECTION.UP]++;
-        };
-        var this_1 = this;
-        for (var i = 0; i < this._bombLength; i++) {
-            var state_1 = _loop_1(i);
-            if (state_1 === "break") break;
         }
-        var _loop_2 = function _loop_2(i) {
+        for (var i = 0; i < this._bombLength; i++) {
             var offset = 1 + i;
-            var block = map_1.MapTile.getInstance().getTile(this_2.tileX, this_2.tileY + offset);
+            var block = map_1.MapTile.getInstance().getTile(this.tileX, this.tileY + offset);
             if (block != map_1.Block.GROUND) {
                 if (block == map_1.Block.BREAKBLOCK) {
-                    map_1.MapTile.getInstance().DestroyTile(this_2.tileX, this_2.tileY + offset);
+                    map_1.MapTile.getInstance().DestroyTile(this.tileX, this.tileY + offset);
                 }
-                return "break";
+                break;
             }
-            var tileRect = map_1.MapTile.getInstance().GetTileBounds(this_2.tileX, this_2.tileY + offset);
-            //Check for Hits
-            monsters.forEach(function (monster) {
-                if (!monster.isHit) {
-                    if (monster.GetHitBounds().within(tileRect)) monster.Die();
-                }
-            });
             boundarray[DIRECTION.DOWN]++;
-        };
-        var this_2 = this;
-        for (var i = 0; i < this._bombLength; i++) {
-            var state_2 = _loop_2(i);
-            if (state_2 === "break") break;
         }
-        var _loop_3 = function _loop_3(i) {
+        for (var i = 0; i < this._bombLength; i++) {
             var offset = -1 - i;
-            var block = map_1.MapTile.getInstance().getTile(this_3.tileX + offset, this_3.tileY);
+            var block = map_1.MapTile.getInstance().getTile(this.tileX + offset, this.tileY);
             if (block != map_1.Block.GROUND) {
                 if (block == map_1.Block.BREAKBLOCK) {
-                    map_1.MapTile.getInstance().DestroyTile(this_3.tileX + offset, this_3.tileY);
+                    map_1.MapTile.getInstance().DestroyTile(this.tileX + offset, this.tileY);
                 }
-                return "break";
+                break;
             }
-            var tileRect = map_1.MapTile.getInstance().GetTileBounds(this_3.tileX + offset, this_3.tileY);
-            //Check for Hits
-            monsters.forEach(function (monster) {
-                if (!monster.isHit) {
-                    if (monster.GetHitBounds().within(tileRect)) monster.Die();
-                }
-            });
             boundarray[DIRECTION.LEFT]++;
-        };
-        var this_3 = this;
-        for (var i = 0; i < this._bombLength; i++) {
-            var state_3 = _loop_3(i);
-            if (state_3 === "break") break;
         }
-        var _loop_4 = function _loop_4(i) {
+        for (var i = 0; i < this._bombLength; i++) {
             var offset = 1 + i;
-            var block = map_1.MapTile.getInstance().getTile(this_4.tileX + offset, this_4.tileY);
+            var block = map_1.MapTile.getInstance().getTile(this.tileX + offset, this.tileY);
             if (block != map_1.Block.GROUND) {
                 if (block == map_1.Block.BREAKBLOCK) {
-                    map_1.MapTile.getInstance().DestroyTile(this_4.tileX + offset, this_4.tileY);
+                    map_1.MapTile.getInstance().DestroyTile(this.tileX + offset, this.tileY);
                 }
-                return "break";
+                break;
             }
-            var tileRect = map_1.MapTile.getInstance().GetTileBounds(this_4.tileX + offset, this_4.tileY);
-            //Check for Hits
-            monsters.forEach(function (monster) {
-                if (!monster.isHit) {
-                    if (monster.GetHitBounds().within(tileRect)) monster.Die();
-                }
-            });
             boundarray[DIRECTION.RIGHT]++;
-        };
-        var this_4 = this;
-        for (var i = 0; i < this._bombLength; i++) {
-            var state_4 = _loop_4(i);
-            if (state_4 === "break") break;
         }
         logger_1.Logger.getInstance().debug(boundarray);
         return boundarray;
@@ -1798,7 +1787,7 @@ var MapTile = function () {
             height: 15,
             tileWidth: 16,
             tileHeight: 16,
-            breakBlockChance: 40,
+            breakBlockChance: 10,
             blockImg: 'blocks_02.png',
             groundImg: 'blocks_04.png',
             ground2Img: 'blocks_05.png',
@@ -2056,6 +2045,7 @@ var logger_1 = require("../logger");
 var Util = require("../util");
 var DIRECTION;
 (function (DIRECTION) {
+    DIRECTION[DIRECTION["NULL"] = -1] = "NULL";
     DIRECTION[DIRECTION["UP"] = 0] = "UP";
     DIRECTION[DIRECTION["DOWN"] = 1] = "DOWN";
     DIRECTION[DIRECTION["LEFT"] = 2] = "LEFT";
@@ -2068,18 +2058,36 @@ var Monster = function (_super) {
         var _this = _super.call(this, 0, 0, "front_1_enemy.png", 2) || this;
         _this._offsetPosition = new Util.Vector2(1, -10);
         _this._mapTile = map_1.MapTile.getInstance();
+        /**
+         * vertical move speed of monster
+         * @type {number}
+         */
         _this._monsterVectorY = 0;
+        /**
+         * horizontal move speed of monster
+         * @type {number}
+         */
         _this._monsterVectorX = 0;
+        /**
+         * target X screen position of monster movement
+         * @type {number}
+         */
         _this._monsterTargetX = 0;
+        /**
+         * target Y screen position of monster movement
+         * @type {number}
+         */
         _this._monsterTargetY = 0;
-        _this._monsterSpeed = 0;
         _this._logger = logger_1.Logger.getInstance();
         _this._monsterWidth = 15;
         _this._monsterHeight = 14;
         _this._stopThinking = false;
         _this._maxTileWalk = 10;
-        _this._walkPath = [];
         _this.isHit = false;
+        _this._moveDirection = DIRECTION.UP;
+        _this._maxThinkCount = 0;
+        _this._EndGame = null;
+        _this._StopMonsters = false;
         _this.Spawn(manager, tilex, tiley);
         return _this;
     }
@@ -2106,96 +2114,101 @@ var Monster = function (_super) {
         this.y = this._currentPosition.y + this._offsetPosition.y;
         ;
     };
+    Monster.prototype.StopMonsters = function () {
+        this._StopMonsters = true;
+        this._moveDone();
+    };
     Monster.prototype.Draw = function (delta, ctx) {
         _super.prototype.Draw.call(this, delta, ctx);
     };
     Monster.prototype._Think = function () {
-        if (this._stopThinking) return;
-        var currentTilePos = this._mapTile.getScreenToTilePosition(this._currentPosition.x, this._currentPosition.y);
-        var count = [0, 0, 0, 0];
-        this._walkPath.length = 0;
-        //check neighbors for longest tile then turn once
-        for (var i = 1; i <= this._maxTileWalk; i++) {
-            var block = this._mapTile.getTile(currentTilePos.x, currentTilePos.y - i);
-            if (block !== map_1.Block.GROUND) {
-                break;
+        if (this.isHit || this._StopMonsters) return;
+        if (this._maxThinkCount < 4) {
+            var currentTilePos = this._mapTile.getScreenToTilePosition(this._currentPosition.x, this._currentPosition.y);
+            switch (this._moveDirection) {
+                case DIRECTION.UP:
+                    var block = this._mapTile.getTile(currentTilePos.x, currentTilePos.y - 1);
+                    if (block !== map_1.Block.GROUND) {
+                        this._moveDirection = DIRECTION.DOWN;
+                        this._maxThinkCount++;
+                        this._Think();
+                    }
+                    break;
+                case DIRECTION.DOWN:
+                    var block = this._mapTile.getTile(currentTilePos.x, currentTilePos.y + 1);
+                    if (block !== map_1.Block.GROUND) {
+                        this._moveDirection = DIRECTION.RIGHT;
+                        this._maxThinkCount++;
+                        this._Think();
+                    }
+                    break;
+                case DIRECTION.RIGHT:
+                    var block = this._mapTile.getTile(currentTilePos.x + 1, currentTilePos.y);
+                    if (block !== map_1.Block.GROUND) {
+                        this._moveDirection = DIRECTION.LEFT;
+                        this._maxThinkCount++;
+                        this._Think();
+                    }
+                    break;
+                case DIRECTION.LEFT:
+                    var block = this._mapTile.getTile(currentTilePos.x - 1, currentTilePos.y);
+                    if (block !== map_1.Block.GROUND) {
+                        this._moveDirection = DIRECTION.UP;
+                        this._maxThinkCount++;
+                        this._Think();
+                    }
+                    break;
+                default:
+                    // code...
+                    // dont go here!!!
+                    break;
             }
-            count[DIRECTION.UP]++;
+        } else {
+            this._moveDirection = DIRECTION.NULL;
         }
-        for (var i = 1; i <= this._maxTileWalk; i++) {
-            var block = this._mapTile.getTile(currentTilePos.x, currentTilePos.y + i);
-            if (block !== map_1.Block.GROUND) {
-                break;
-            }
-            count[DIRECTION.DOWN]++;
-        }
-        for (var i = 1; i <= this._maxTileWalk; i++) {
-            var block = this._mapTile.getTile(currentTilePos.x + i, currentTilePos.y);
-            if (block !== map_1.Block.GROUND) {
-                break;
-            }
-            count[DIRECTION.RIGHT]++;
-        }
-        for (var i = 1; i <= this._maxTileWalk; i++) {
-            var block = this._mapTile.getTile(currentTilePos.x - i, currentTilePos.y);
-            if (block !== map_1.Block.GROUND) {
-                break;
-            }
-            count[DIRECTION.LEFT]++;
-        }
-        var max = 0;
-        for (var i = 1; i < count.length; i++) {
-            if (count[i] > count[i - 1]) {
-                max = i;
-            }
-        }
-        var lastWalkPos = new Util.Vector2(currentTilePos.x, currentTilePos.y);
-        for (var i = 1; i <= count[max]; i++) {
-            var offX = 0;
-            var offY = 0;
-            if (max == DIRECTION.UP) offY = -1;else if (max == DIRECTION.DOWN) offY = 1;else if (max == DIRECTION.LEFT) offX = -1;else if (max == DIRECTION.RIGHT) offX = 1;
-            lastWalkPos.x += offX;
-            lastWalkPos.y += offY;
-            this._walkPath.push(new Util.Vector2(offX, offY));
-        }
-        this._stopThinking = true;
-        this._ProcessMovement();
+        this._ProcessMovement(this._moveDirection);
     };
-    Monster.prototype._ProcessMovement = function () {
+    Monster.prototype._ProcessMovement = function (moveDirection) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, path;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _i = 0, _a = this._walkPath;
-                        _b.label = 1;
+                        return [4 /*yield*/, this._MoveToTile(moveDirection)];
                     case 1:
-                        if (!(_i < _a.length)) return [3 /*break*/, 4];
-                        path = _a[_i];
-                        return [4 /*yield*/, this._MoveToTile(path)];
-                    case 2:
-                        _b.sent();
-                        _b.label = 3;
-                    case 3:
-                        _i++;
-                        return [3 /*break*/, 1];
-                    case 4:
-                        this._stopThinking = false;
+                        _a.sent();
+                        this._maxThinkCount = 0;
                         this._Think();
                         return [2 /*return*/];
                 }
             });
         });
     };
-    Monster.prototype._MoveToTile = function (path) {
+    Monster.prototype._MoveToTile = function (moveDir) {
         var _this = this;
         return new _promise2.default(function (r, e) {
             try {
-                var vec2 = _this._mapTile.getScreenToTilePosition(_this._currentPosition.x, _this._currentPosition.y);
+                var currentTilePos = _this._mapTile.getScreenToTilePosition(_this._currentPosition.x, _this._currentPosition.y);
+                var path = new Util.Vector2(0, 0);
+                switch (moveDir) {
+                    case DIRECTION.UP:
+                        path.y = -1;
+                        break;
+                    case DIRECTION.DOWN:
+                        path.y = 1;
+                        break;
+                    case DIRECTION.RIGHT:
+                        path.x = 1;
+                        break;
+                    case DIRECTION.LEFT:
+                        path.x = -1;
+                        break;
+                    default:
+                        // code...
+                        break;
+                }
                 _this._monsterVectorX = path.x;
                 _this._monsterVectorY = path.y;
-                // Logger.getInstance().debug(this._monsterVectorX, this._monsterVectorY, path, vec2);
-                var targetVec2 = _this._mapTile.getTileScreenPosition(vec2.x + path.x, vec2.y + path.y);
+                var targetVec2 = _this._mapTile.getTileScreenPosition(currentTilePos.x + path.x, currentTilePos.y + path.y);
                 _this._monsterTargetX = targetVec2.x;
                 _this._monsterTargetY = targetVec2.y;
                 _this._moveDone = function () {
@@ -2208,7 +2221,6 @@ var Monster = function (_super) {
     };
     Monster.prototype.GetHitBounds = function () {
         var rect = new Util.cRectangle(this._currentPosition.x, this._currentPosition.y, this._monsterWidth, this._monsterHeight);
-        logger_1.Logger.getInstance().debug(rect);
         return rect;
     };
     Monster.prototype.Die = function () {
@@ -2260,8 +2272,10 @@ var MonsterManager = function () {
     MonsterManager.prototype.SpawnMonster = function (tileX, tileY) {
         this._Monsters.push(new Monster(this, tileX, tileY));
     };
-    MonsterManager.prototype.init = function (player) {
+    MonsterManager.prototype.init = function (player, endgame) {
         this._Player = player;
+        this._EndGame = endgame;
+        this._Monsters.length = 0;
         this.SpawnMonster(1, 13);
         this.SpawnMonster(19, 13);
         this.SpawnMonster(19, 1);
@@ -2269,9 +2283,22 @@ var MonsterManager = function () {
     MonsterManager.prototype.GetMonsters = function () {
         return this._Monsters;
     };
+    MonsterManager.prototype.GetPlayers = function () {
+        return this._Player;
+    };
+    MonsterManager.prototype.StopMonsters = function () {
+        this._Monsters.forEach(function (monster) {
+            monster.StopMonsters();
+        });
+    };
     MonsterManager.prototype.DeleteMonster = function (monster) {
         var idx = this._Monsters.indexOf(monster);
-        this._Monsters.splice(idx, 1);
+        this._Monsters[idx].isVisible = false;
+        var check = false;
+        this._Monsters.forEach(function (monster) {
+            if (!check) check = monster.isVisible;
+        });
+        if (!check) this._EndGame();
     };
     return MonsterManager;
 }();
@@ -2280,6 +2307,10 @@ exports.MonsterManager = MonsterManager;
 
 },{"../logger":82,"../util":88,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2,"babel-runtime/core-js/promise":3}],79:[function(require,module,exports){
 "use strict";
+
+var _promise = require("babel-runtime/core-js/promise");
+
+var _promise2 = _interopRequireDefault(_promise);
 
 var _create = require("babel-runtime/core-js/object/create");
 
@@ -2307,6 +2338,83 @@ var __extends = undefined && undefined.__extends || function () {
         d.prototype = b === null ? (0, _create2.default)(b) : (__.prototype = b.prototype, new __());
     };
 }();
+var __awaiter = undefined && undefined.__awaiter || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = _promise2.default))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function rejected(value) {
+            try {
+                step(generator["throw"](value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function step(result) {
+            result.done ? resolve(result.value) : new P(function (resolve) {
+                resolve(result.value);
+            }).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = undefined && undefined.__generator || function (thisArg, body) {
+    var _ = { label: 0, sent: function sent() {
+            if (t[0] & 1) throw t[1];return t[1];
+        }, trys: [], ops: [] },
+        f,
+        y,
+        t;
+    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    function verb(n) {
+        return function (v) {
+            return step([n, v]);
+        };
+    }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) {
+            try {
+                if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+                if (y = 0, t) op = [0, t.value];
+                switch (op[0]) {
+                    case 0:case 1:
+                        t = op;break;
+                    case 4:
+                        _.label++;return { value: op[1], done: false };
+                    case 5:
+                        _.label++;y = op[1];op = [0];continue;
+                    case 7:
+                        op = _.ops.pop();_.trys.pop();continue;
+                    default:
+                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                            _ = 0;continue;
+                        }
+                        if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                            _.label = op[1];break;
+                        }
+                        if (op[0] === 6 && _.label < t[1]) {
+                            _.label = t[1];t = op;break;
+                        }
+                        if (t && _.label < t[2]) {
+                            _.label = t[2];_.ops.push(op);break;
+                        }
+                        if (t[2]) _.ops.pop();
+                        _.trys.pop();continue;
+                }
+                op = body.call(thisArg, _);
+            } catch (e) {
+                op = [6, e];y = 0;
+            } finally {
+                f = t = 0;
+            }
+        }if (op[0] & 5) throw op[1];return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 exports.__esModule = true;
 var entity_1 = require("./entity");
 var map_1 = require("./map");
@@ -2315,7 +2423,7 @@ var bomb_manager_1 = require("./bomb-manager");
 var Util = require("../util");
 var Player = function (_super) {
     __extends(Player, _super);
-    function Player() {
+    function Player(endgame) {
         var _this = _super.call(this, 0, 0, "front_1.png", 0) || this;
         _this._offsetPosition = new Util.Vector2(1, -10);
         _this._mapTile = map_1.MapTile.getInstance();
@@ -2326,10 +2434,14 @@ var Player = function (_super) {
         _this._playerHeight = 14;
         _this._IsDead = false;
         _this._JustBombDroppedRect = null;
+        _this._EndGame = null;
+        _this._EndGame = endgame;
         _this.Spawn();
         return _this;
     }
     Player.prototype.Spawn = function () {
+        this._IsDead = false;
+        this.imageName = "front_1.png";
         this._currentPosition = this._mapTile.getTileScreenPosition(1, 1);
         this.UpdatePosition();
     };
@@ -2354,6 +2466,23 @@ var Player = function (_super) {
             this._JustBombDroppedRect = this._bombManager.SpawnBomb(this._currentPosition.x, this._currentPosition.y);
         }
     };
+    Player.prototype.Die = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        logger_1.Logger.getInstance().debug("Monster Die!");
+                        this._IsDead = true;
+                        this.imageName = "dead_1.png";
+                        return [4 /*yield*/, Util.sleep(1000)];
+                    case 1:
+                        _a.sent();
+                        this._EndGame();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     Player.prototype.UpdatePosition = function () {
         this.x = this._currentPosition.x + this._offsetPosition.x;
         this.y = this._currentPosition.y + this._offsetPosition.y;
@@ -2368,11 +2497,15 @@ var Player = function (_super) {
     Player.prototype.Draw = function (delta, ctx) {
         _super.prototype.Draw.call(this, delta, ctx);
     };
+    Player.prototype.GetHitBounds = function () {
+        var rect = new Util.cRectangle(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight);
+        return rect;
+    };
     return Player;
 }(entity_1.Entity);
 exports.Player = Player;
 
-},{"../logger":82,"../util":88,"./bomb-manager":75,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],80:[function(require,module,exports){
+},{"../logger":82,"../util":88,"./bomb-manager":75,"./entity":76,"./map":77,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2,"babel-runtime/core-js/promise":3}],80:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -2802,15 +2935,22 @@ var player_1 = require("../entities/player");
 var input_1 = require("../input");
 var bomb_manager_1 = require("../entities/bomb-manager");
 var monster_manager_1 = require("../entities/monster-manager");
+var window_manager_1 = require("../window-manager");
+var logger_1 = require("../logger");
 var MainGame = function (_super) {
     __extends(MainGame, _super);
     function MainGame() {
         var _this = _super.call(this) || this;
         _this._BombManager = bomb_manager_1.BombManager.getInstance();
         _this._MonsterManager = monster_manager_1.MonsterManager.getInstance();
+        _this._WindowManager = window_manager_1.WindowManager.getInstance();
+        _this._isPause = false;
+        _this._mouseDownListener = null;
         _this._MapTile = map_1.MapTile.getInstance();
         _this.addEntities(_this._BombManager);
-        _this._Player = new player_1.Player();
+        _this._Player = new player_1.Player(function () {
+            _this.EndGame();
+        });
         _this.addEntities(_this._Player);
         _this._InputController = new input_1.InputController({
             Up_KeyDown: function Up_KeyDown() {
@@ -2846,24 +2986,59 @@ var MainGame = function (_super) {
             },
             ESC_KeyUp: function ESC_KeyUp() {}
         });
-        _this._MonsterManager.init(_this._Player);
+        _this._MonsterManager.init(_this._Player, function () {
+            _this.EndGame();
+        });
+        _this._mouseDownListener = function () {
+            _this.InitGame();
+        };
         return _this;
     }
+    MainGame.prototype.EndGame = function () {
+        this._isPause = true;
+        this._MonsterManager.StopMonsters();
+        window.addEventListener("mousedown", this._mouseDownListener);
+    };
+    MainGame.prototype.InitGame = function () {
+        var _this = this;
+        logger_1.Logger.getInstance().debug("Init Game..");
+        this._isPause = false;
+        this._Player.Spawn();
+        this._MonsterManager.init(this._Player, function () {
+            _this.EndGame();
+        });
+        window.removeEventListener("mousedown", this._mouseDownListener);
+    };
     MainGame.prototype.Update = function (delta) {
         _super.prototype.Update.call(this, delta);
-        this._MonsterManager.Update(delta);
-        this._InputController.Update();
+        if (!this._isPause) {
+            this._MonsterManager.Update(delta);
+            this._InputController.Update();
+        }
     };
     MainGame.prototype.Draw = function (delta, ctx) {
         this._MapTile.Draw(delta, ctx);
         _super.prototype.Draw.call(this, delta, ctx);
         this._MonsterManager.Draw(delta, ctx);
+        if (this._isPause) {
+            ctx.save();
+            ctx.font = "25px Arial";
+            var centerX = this._WindowManager.canvasWidth / 2;
+            var centerY = this._WindowManager.canvasHeight / 2;
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.fillText("Game Over!", centerX, centerY - 50);
+            ctx.strokeText("Game Over!", centerX, centerY - 50);
+            ctx.fillText("Click on screen to play again", centerX, centerY);
+            ctx.strokeText("Click on screen to play again", centerX, centerY);
+            ctx.restore();
+        }
     };
     return MainGame;
 }(state_1.State);
 exports.MainGame = MainGame;
 
-},{"../entities/bomb-manager":75,"../entities/map":77,"../entities/monster-manager":78,"../entities/player":79,"../input":81,"./state":86,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],86:[function(require,module,exports){
+},{"../entities/bomb-manager":75,"../entities/map":77,"../entities/monster-manager":78,"../entities/player":79,"../input":81,"../logger":82,"../window-manager":89,"./state":86,"babel-runtime/core-js/object/create":1,"babel-runtime/core-js/object/set-prototype-of":2}],86:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -3026,6 +3201,7 @@ var cRectangle = function () {
         this.y = y;
     };
     cRectangle.prototype.within = function (outer_rect) {
+        logger_1.Logger.getInstance().debug(this, outer_rect);
         if (outer_rect.x > this.x) {
             // this is not in it;
             return false;
@@ -3096,10 +3272,21 @@ exports.__esModule = true;
 var logger_1 = require("./logger");
 var WindowManager = function () {
     function WindowManager(options) {
+        if (WindowManager._instance) {
+            throw new Error('Logger is a singleton');
+        }
         this._options = options;
         this._logger = logger_1.Logger.getInstance();
         this._initialize();
+        WindowManager._instance = this;
+        return WindowManager._instance;
     }
+    WindowManager.getInstance = function () {
+        if (WindowManager._instance == null) {
+            WindowManager._instance = new WindowManager();
+        }
+        return WindowManager._instance;
+    };
     WindowManager.prototype._initialize = function () {
         var _this = this;
         this.canvasElementId = this._options.canvasElementId;
@@ -3140,6 +3327,7 @@ var WindowManager = function () {
     };
     return WindowManager;
 }();
+WindowManager._instance = null;
 exports.WindowManager = WindowManager;
 
 },{"./logger":82}],90:[function(require,module,exports){
