@@ -80,7 +80,6 @@ export class MainGame extends State {
     public Draw(delta: number, ctx: CanvasRenderingContext2D): void {
         this._MapTile.Draw(delta, ctx);
         super.Draw(delta, ctx);
-
         this._MonsterManager.Draw(delta,ctx);
 
         if(this._isPause) {

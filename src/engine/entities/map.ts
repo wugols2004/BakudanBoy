@@ -20,7 +20,8 @@ export enum Block {
     GROUND,
     GROUND2,
     BREAKBLOCK,
-    GROUNDBOMB
+    GROUNDBOMB,
+    GROUNDBOMB_PASS,
 }
 
 class BreakBlockAnim {
@@ -139,7 +140,8 @@ export class MapTile {
             this._mapOption.groundImg,
             this._mapOption.ground2Img,
             this._mapOption.breakableImg,
-            this._mapOption.groundImg
+            this._mapOption.groundImg,
+            this._mapOption.groundImg,
         ];
 
         this._mapData.length = 0;
@@ -315,6 +317,21 @@ export class MapTile {
         let tile = this.getScreenToTilePosition(posX,posY);
 
         this._mapData[tile.x + (tile.y * this._mapOption.width)] = Block.GROUNDBOMB;
+
+        this._logger.debug("MarkTileBomb x {0} y {1}", tile.x,tile.y);
+
+        return this.GetTileBounds(tile.x,tile.y);
+    }
+
+    public UnMarkTileBomb(posX: number, posY: number): Util.cRectangle {
+        let tile = this.getScreenToTilePosition(posX,posY);
+
+        this._logger.debug("UnMarkTileBomb x {0} y {1}", tile.x,tile.y);
+
+        if(this._mapData[tile.x + (tile.y * this._mapOption.width)] !== Block.GROUNDBOMB)
+            throw new Error("tile is not groundbomb");
+
+        this._mapData[tile.x + (tile.y * this._mapOption.width)] = Block.GROUND;
 
         return this.GetTileBounds(tile.x,tile.y);
     }

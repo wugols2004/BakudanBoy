@@ -69,9 +69,6 @@ export class cRectangle {
     }
 
     within(outer_rect: cRectangle): boolean {
-
-        Logger.getInstance().debug(this, outer_rect);
-
         if (outer_rect.x > this.x) {
             // this is not in it;
             return false;
@@ -87,6 +84,16 @@ export class cRectangle {
         }
         return true;
 
+    }
+
+    collides(outer_rect: cRectangle): boolean {
+        // Logger.getInstance().debug(this, outer_rect);
+
+        return !(
+            (this.y + this.h < outer_rect.y) ||
+            (this.y > outer_rect.y + outer_rect.h) ||
+            (this.x > outer_rect.x + outer_rect.w) ||
+            (this.x + this.w < outer_rect.x))
     }
 }
 
@@ -127,12 +134,12 @@ export function SortArray(values: any[]) {
     });
 }
 
-export function CircleCollision(obj1: Vector2, obj2: Vector2, rad1: number, rad2: number): boolean{
+export function CircleCollision(obj1: Vector2, obj2: Vector2, rad1: number, rad2: number): boolean {
     let hit = false;
 
     // Get distance with Pythagoras
     let squaredist = (obj1.x * obj2.x) + (obj1.y * obj2.y);
-    hit =  squaredist <= (rad1 + rad2) * (rad1 + rad2);
+    hit = squaredist <= (rad1 + rad2) * (rad1 + rad2);
 
     return hit;
 }

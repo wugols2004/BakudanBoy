@@ -18,7 +18,7 @@ export class Player extends Entity {
 
 	private _bombManager: BombManager = BombManager.getInstance();
 
-	private _playerWidth: number = 15;
+	private _playerWidth: number = 14;
 	private _playerHeight: number = 14;
 
 	private _IsDead: boolean = false;
@@ -70,13 +70,25 @@ export class Player extends Entity {
 
 	public DropBomb(): void {
 		if(!this._IsDead){
-			this._JustBombDroppedRect = this._bombManager.SpawnBomb(this._currentPosition.x,this._currentPosition.y);
+			let justdropped = this._bombManager.SpawnBomb(this._currentPosition.x,this._currentPosition.y);
+
+			if(justdropped!== null){
+		    	this._JustBombDroppedRect = justdropped;
+
+		    	if(!this.GetHitBounds().collides(this._JustBombDroppedRect)){
+					this._mapTile.MarkTileBombPass(this._JustBombDroppedRect.x,this._JustBombDroppedRect.y);
+					this._JustBombDroppedRect = null;
+				}
+			}
+
+			// if(this._JustBombDroppedRect === null)
+			// 	throw new error("this._JustBombDroppedRect is null!", this._JustBombDroppedRect);
 		}
 
 	}
 
 	public async Die() {
-		Logger.getInstance().debug("Monster Die!");
+		Logger.getInstance().debug("Player Die!");
 		this._IsDead = true;
 		this.imageName = "dead_1.png";
 		await Util.sleep(1000);
@@ -87,13 +99,12 @@ export class Player extends Entity {
 		this.x = this._currentPosition.x + this._offsetPosition.x;
 		this.y = this._currentPosition.y + this._offsetPosition.y;
 
-		// if(this._JustBombDroppedRect !== null) {
-		// 	let playerRect = new Util.cRectangle(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight);
-		// 	if(!playerRect.within(this._JustBombDroppedRect)){
-		// 		this._mapTile.MarkTileBomb(this._JustBombDroppedRect.x,this._JustBombDroppedRect.y);
-		// 		this._JustBombDroppedRect = null;
-		// 	}
-		// }
+		if(this._JustBombDroppedRect !== null) {
+			if(!this.GetHitBounds().collides(this._JustBombDroppedRect)){
+				this._mapTile.MarkTileBomb(this._JustBombDroppedRect.x,this._JustBombDroppedRect.y);
+				this._JustBombDroppedRect = null;
+			}
+		}
 	}
 
 	public Draw(delta: number, ctx: CanvasRenderingContext2D): void {

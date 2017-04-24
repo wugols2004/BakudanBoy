@@ -48,7 +48,7 @@ export class Monster extends Entity {
 	private _logger: Logger = Logger.getInstance();
 
 	private _monsterWidth: number = 15;
-	private _monsterHeight: number = 14;
+	private _monsterHeight: number = 15;
 
 	private _stopThinking: boolean = false;
 	private _maxTileWalk: number = 10;
@@ -249,7 +249,13 @@ export class MonsterManager {
 	public Update(delta: number): void {
 		this._Monsters.forEach((monster) => {
 			monster.Update(delta);
+
+			if(this._Player.GetHitBounds().collides(monster.GetHitBounds())){
+				this._Player.Die();
+			}
 		});
+
+
 	}
 
 	public Draw(delta: number, ctx: CanvasRenderingContext2D): void {

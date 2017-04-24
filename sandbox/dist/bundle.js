@@ -1378,7 +1378,7 @@ var logger_1 = require("../logger");
 var Util = require("../util");
 var spritesheet_1 = require("../spritesheet");
 var monster_manager_1 = require("./monster-manager");
-var _BOMB_TIME_OUT = 3000;
+var _BOMB_TIME_OUT = 1200;
 var BOMB_STATES;
 (function (BOMB_STATES) {
     BOMB_STATES[BOMB_STATES["IDLE"] = 0] = "IDLE";
@@ -1630,6 +1630,7 @@ var Bomb = function (_super) {
                         _this._currentTick = 0;
                         _this._bombAnimObj = new BombExplosion(_this.currentMapPosition.x, _this.currentMapPosition.y, _this._bombLength);
                         _this._bombAnimObj.onAnimEnd = function () {
+                            map_1.MapTile.getInstance().UnMarkTileBomb(_this.x, _this.y);
                             r(true);
                         };
                     } catch (err) {
@@ -1738,6 +1739,7 @@ var Block;
     Block[Block["GROUND2"] = 2] = "GROUND2";
     Block[Block["BREAKBLOCK"] = 3] = "BREAKBLOCK";
     Block[Block["GROUNDBOMB"] = 4] = "GROUNDBOMB";
+    Block[Block["GROUNDBOMB_PASS"] = 5] = "GROUNDBOMB_PASS";
 })(Block = exports.Block || (exports.Block = {}));
 var BreakBlockAnim = function () {
     function BreakBlockAnim(_tileX, _tileY, _onAnimEnd) {
@@ -1811,7 +1813,7 @@ var MapTile = function () {
     };
     MapTile.prototype._initialize = function (maptileoption) {
         this._mapOption = Util.extend(this._defaultMapTileOption, maptileoption);
-        this._BlockSprites = [this._mapOption.blockImg, this._mapOption.groundImg, this._mapOption.ground2Img, this._mapOption.breakableImg, this._mapOption.groundImg];
+        this._BlockSprites = [this._mapOption.blockImg, this._mapOption.groundImg, this._mapOption.ground2Img, this._mapOption.breakableImg, this._mapOption.groundImg, this._mapOption.groundImg];
         this._mapData.length = 0;
         this._SpriteSheet = spritesheet_1.SpriteSheet.getInstance();
         this.GenerateMap(this._mapOption);
@@ -1921,6 +1923,14 @@ var MapTile = function () {
     MapTile.prototype.MarkTileBomb = function (posX, posY) {
         var tile = this.getScreenToTilePosition(posX, posY);
         this._mapData[tile.x + tile.y * this._mapOption.width] = Block.GROUNDBOMB;
+        this._logger.debug("MarkTileBomb x {0} y {1}", tile.x, tile.y);
+        return this.GetTileBounds(tile.x, tile.y);
+    };
+    MapTile.prototype.UnMarkTileBomb = function (posX, posY) {
+        var tile = this.getScreenToTilePosition(posX, posY);
+        this._logger.debug("UnMarkTileBomb x {0} y {1}", tile.x, tile.y);
+        if (this._mapData[tile.x + tile.y * this._mapOption.width] !== Block.GROUNDBOMB) throw new Error("tile is not groundbomb");
+        this._mapData[tile.x + tile.y * this._mapOption.width] = Block.GROUND;
         return this.GetTileBounds(tile.x, tile.y);
     };
     return MapTile;
@@ -2080,7 +2090,7 @@ var Monster = function (_super) {
         _this._monsterTargetY = 0;
         _this._logger = logger_1.Logger.getInstance();
         _this._monsterWidth = 15;
-        _this._monsterHeight = 14;
+        _this._monsterHeight = 15;
         _this._stopThinking = false;
         _this._maxTileWalk = 10;
         _this.isHit = false;
@@ -2260,8 +2270,12 @@ var MonsterManager = function () {
         return MonsterManager._instance;
     };
     MonsterManager.prototype.Update = function (delta) {
+        var _this = this;
         this._Monsters.forEach(function (monster) {
             monster.Update(delta);
+            if (_this._Player.GetHitBounds().collides(monster.GetHitBounds())) {
+                _this._Player.Die();
+            }
         });
     };
     MonsterManager.prototype.Draw = function (delta, ctx) {
@@ -2430,7 +2444,7 @@ var Player = function (_super) {
         _this._playerSpeed = 1;
         _this._logger = logger_1.Logger.getInstance();
         _this._bombManager = bomb_manager_1.BombManager.getInstance();
-        _this._playerWidth = 15;
+        _this._playerWidth = 14;
         _this._playerHeight = 14;
         _this._IsDead = false;
         _this._JustBombDroppedRect = null;
@@ -2463,7 +2477,16 @@ var Player = function (_super) {
     };
     Player.prototype.DropBomb = function () {
         if (!this._IsDead) {
-            this._JustBombDroppedRect = this._bombManager.SpawnBomb(this._currentPosition.x, this._currentPosition.y);
+            var justdropped = this._bombManager.SpawnBomb(this._currentPosition.x, this._currentPosition.y);
+            if (justdropped !== null) {
+                this._JustBombDroppedRect = justdropped;
+                if (!this.GetHitBounds().collides(this._JustBombDroppedRect)) {
+                    this._mapTile.MarkTileBombPass(this._JustBombDroppedRect.x, this._JustBombDroppedRect.y);
+                    this._JustBombDroppedRect = null;
+                }
+            }
+            // if(this._JustBombDroppedRect === null)
+            // 	throw new error("this._JustBombDroppedRect is null!", this._JustBombDroppedRect);
         }
     };
     Player.prototype.Die = function () {
@@ -2471,7 +2494,7 @@ var Player = function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        logger_1.Logger.getInstance().debug("Monster Die!");
+                        logger_1.Logger.getInstance().debug("Player Die!");
                         this._IsDead = true;
                         this.imageName = "dead_1.png";
                         return [4 /*yield*/, Util.sleep(1000)];
@@ -2486,13 +2509,12 @@ var Player = function (_super) {
     Player.prototype.UpdatePosition = function () {
         this.x = this._currentPosition.x + this._offsetPosition.x;
         this.y = this._currentPosition.y + this._offsetPosition.y;
-        // if(this._JustBombDroppedRect !== null) {
-        // 	let playerRect = new Util.cRectangle(this._currentPosition.x, this._currentPosition.y, this._playerWidth, this._playerHeight);
-        // 	if(!playerRect.within(this._JustBombDroppedRect)){
-        // 		this._mapTile.MarkTileBomb(this._JustBombDroppedRect.x,this._JustBombDroppedRect.y);
-        // 		this._JustBombDroppedRect = null;
-        // 	}
-        // }
+        if (this._JustBombDroppedRect !== null) {
+            if (!this.GetHitBounds().collides(this._JustBombDroppedRect)) {
+                this._mapTile.MarkTileBomb(this._JustBombDroppedRect.x, this._JustBombDroppedRect.y);
+                this._JustBombDroppedRect = null;
+            }
+        }
     };
     Player.prototype.Draw = function (delta, ctx) {
         _super.prototype.Draw.call(this, delta, ctx);
@@ -3201,7 +3223,6 @@ var cRectangle = function () {
         this.y = y;
     };
     cRectangle.prototype.within = function (outer_rect) {
-        logger_1.Logger.getInstance().debug(this, outer_rect);
         if (outer_rect.x > this.x) {
             // this is not in it;
             return false;
@@ -3213,6 +3234,10 @@ var cRectangle = function () {
             return false;
         }
         return true;
+    };
+    cRectangle.prototype.collides = function (outer_rect) {
+        // Logger.getInstance().debug(this, outer_rect);
+        return !(this.y + this.h < outer_rect.y || this.y > outer_rect.y + outer_rect.h || this.x > outer_rect.x + outer_rect.w || this.x + this.w < outer_rect.x);
     };
     return cRectangle;
 }();

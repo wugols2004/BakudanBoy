@@ -5,7 +5,7 @@ import * as Util from '../util'
 import { SpriteSheet } from '../spritesheet'
 import { MonsterManager, Monster } from './monster-manager'
 
-const _BOMB_TIME_OUT: number = 3000;
+const _BOMB_TIME_OUT: number = 1200;
 
 enum BOMB_STATES {
 	IDLE,
@@ -380,6 +380,7 @@ class Bomb extends Entity {
 				this._bombAnimObj = new BombExplosion(this.currentMapPosition.x, this.currentMapPosition.y, this._bombLength);
 
 				this._bombAnimObj.onAnimEnd = () => {
+					MapTile.getInstance().UnMarkTileBomb(this.x,this.y);
 					r(true);
 				}
 			}
